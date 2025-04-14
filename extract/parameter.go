@@ -173,6 +173,12 @@ func ParameterFromBlock(block *terraform.Block) (*types.Parameter, hcl.Diagnosti
 		}
 	}
 
+	if !diags.HasErrors() {
+		// Only do this validation if the parameter is valid, as if some errors
+		// exist, then this is likely to fail be excess information.
+		diags = diags.Extend(p.Valid())
+	}
+
 	usageDiags := ParameterUsageDiagnostics(p)
 	if usageDiags.HasErrors() {
 		p.FormType = provider.ParameterFormTypeError
@@ -243,7 +249,6 @@ func ParameterValidationFromBlock(block *terraform.Block) (types.ParameterValida
 		Min:       nullableInteger(block, "min"),
 		Max:       nullableInteger(block, "max"),
 		Monotonic: nullableString(block, "monotonic"),
-		Invalid:   nullableBoolean(block, "invalid"),
 	}
 
 	return p, diags

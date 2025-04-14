@@ -77,9 +77,13 @@ func Parameters(writer io.Writer, params []types.Parameter, files map[string]*hc
 		//} else {
 		//	strVal = value.GoString()
 		//}
+		dp := p.DisplayName
+		if p.DisplayName == "" {
+			dp = p.Name
+		}
 
 		tableWriter.AppendRow(table.Row{
-			fmt.Sprintf("(%s) %s: %s\n%s", p.DisplayName, p.Name, p.Description, formatOptions(selections, p.Options)),
+			fmt.Sprintf("(%s) %s: %s\n%s", dp, p.Name, p.Description, formatOptions(selections, p.Options)),
 		})
 
 		if hcl.Diagnostics(p.Diagnostics).HasErrors() {

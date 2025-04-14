@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/aquasecurity/trivy/pkg/iac/terraform"
+	"github.com/hashicorp/hcl/v2"
 	"github.com/zclconf/go-cty/cty"
 
 	"github.com/coder/terraform-provider-coder/v2/provider"
@@ -73,24 +74,16 @@ type ParameterValidation struct {
 	Min       *int64  `json:"validation_min"`
 	Max       *int64  `json:"validation_max"`
 	Monotonic *string `json:"validation_monotonic"`
-	Invalid   *bool   `json:"validation_invalid"`
 }
 
 // Valid takes the type of the value and the value itself and returns an error
 // if the value is invalid.
-func (v ParameterValidation) Valid(typ string, value string) error {
+func (v *ParameterValidation) Valid(typ string, value string) error {
 	// TODO: Validate typ is the enum?
 	// Use the provider.Validation struct to validate the value to be
 	// consistent with the provider.
-	return (&provider.Validation{
-		Min:         int(orZero(v.Min)),
-		MinDisabled: v.Min == nil,
-		Max:         int(orZero(v.Max)),
-		MaxDisabled: v.Max == nil,
-		Monotonic:   orZero(v.Monotonic),
-		Regex:       orZero(v.Regex),
-		Error:       v.Error,
-	}).Valid(provider.OptionType(typ), value)
+	pv := providerValidation(v)
+	return (&pv).Valid(provider.OptionType(typ), value)
 }
 
 type ParameterOption struct {
@@ -98,6 +91,31 @@ type ParameterOption struct {
 	Description string    `json:"description"`
 	Value       HCLString `json:"value"`
 	Icon        string    `json:"icon"`
+}
+
+func (r *ParameterData) Valid() hcl.Diagnostics {
+	diag := (&provider.Parameter{
+		Name:        r.Name,
+		DisplayName: r.DisplayName,
+		Description: r.Description,
+		Type:        provider.OptionType(r.Type),
+		FormType:    r.FormType,
+		Mutable:     r.Mutable,
+		Default:     r.DefaultValue.AsString(),
+		Icon:        r.Icon,
+		Option:      providerOptions(r.Options),
+		Validation:  providerValidations(r.Validations),
+		Optional:    false,
+		Order:       int(r.Order),
+		Ephemeral:   r.Ephemeral,
+	}).Valid()
+
+	if diag.HasError() {
+		// TODO: We can take the attr path and decorate the error with
+		//   source information.
+		return hclDiagnostics(diag)
+	}
+	return nil
 }
 
 // CtyType returns the cty.Type for the ParameterData.
