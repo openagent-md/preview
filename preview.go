@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/hcl/v2"
 	"github.com/zclconf/go-cty/cty"
 
+	"github.com/coder/preview/hclext"
 	"github.com/coder/preview/types"
 )
 
@@ -116,7 +117,7 @@ func Preview(ctx context.Context, input Input, dir fs.FS) (output *Output, diagn
 		}
 	}
 
-	modules, outputs, err := p.EvaluateAll(ctx)
+	modules, _, err := p.EvaluateAll(ctx)
 	if err != nil {
 		return nil, hcl.Diagnostics{
 			{
@@ -126,6 +127,8 @@ func Preview(ctx context.Context, input Input, dir fs.FS) (output *Output, diagn
 			},
 		}
 	}
+	
+	outputs := hclext.ExportOutputs(modules)
 
 	diags := make(hcl.Diagnostics, 0)
 	rp, rpDiags := parameters(modules)
