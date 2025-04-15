@@ -22,8 +22,20 @@ func TestToCtyValue(t *testing.T) {
 		},
 	}
 
-	_, err := owner.ToCtyValue()
+	ownerValue, err := owner.ToCtyValue()
 	require.NoError(t, err)
+
+	require.Equal(t, owner.ID.String(), ownerValue.AsValueMap()["id"].AsString())
+	require.Equal(t, owner.Name, ownerValue.AsValueMap()["name"].AsString())
+	require.Equal(t, owner.SSHPublicKey, ownerValue.AsValueMap()["ssh_public_key"].AsString())
+	for i, it := range owner.Groups {
+		require.Equal(t, it, ownerValue.AsValueMap()["groups"].AsValueSlice()[i].AsString())
+	}
+	for i, it := range owner.RBACRoles {
+		roleValueMap := ownerValue.AsValueMap()["rbac_roles"].AsValueSlice()[i].AsValueMap()
+		require.Equal(t, it.Name, roleValueMap["name"].AsString())
+		require.Equal(t, it.OrgID.String(), roleValueMap["org_id"].AsString())
+	}
 }
 
 func TestToCtyValueWithNilLists(t *testing.T) {
@@ -38,6 +50,8 @@ func TestToCtyValueWithNilLists(t *testing.T) {
 		RBACRoles:    nil,
 	}
 
-	_, err := owner.ToCtyValue()
+	ownerValue, err := owner.ToCtyValue()
 	require.NoError(t, err)
+	require.Empty(t, ownerValue.AsValueMap()["groups"].AsValueSlice())
+	require.Empty(t, ownerValue.AsValueMap()["rbac_roles"].AsValueSlice())
 }

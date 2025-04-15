@@ -28,6 +28,9 @@ type WorkspaceOwner struct {
 }
 
 func (o *WorkspaceOwner) ToCtyValue() (cty.Value, error) {
+	if o.Groups == nil {
+		o.Groups = []string{}
+	}
 	convertedGroups, err := gocty.ToCtyValue(o.Groups, cty.List(cty.String))
 	if err != nil {
 		return cty.Value{}, err
