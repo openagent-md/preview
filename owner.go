@@ -8,7 +8,7 @@ import (
 	"github.com/zclconf/go-cty/cty"
 )
 
-func WorkspaceOwnerHook(dfs fs.FS, input Input) (func(ctx *tfcontext.Context, blocks terraform.Blocks, inputVars map[string]cty.Value), error) {
+func workspaceOwnerHook(dfs fs.FS, input Input) (func(ctx *tfcontext.Context, blocks terraform.Blocks, inputVars map[string]cty.Value), error) {
 	ownerValue, err := input.Owner.ToCtyValue()
 	if err != nil {
 		return nil, err
