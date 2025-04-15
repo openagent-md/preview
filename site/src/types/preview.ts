@@ -89,6 +89,9 @@ export interface SessionInputs {
     readonly User: WorkspaceOwner;
 }
 
+// From types/value.go
+export const UnknownStringValue = "??";
+
 // From types/parameter.go
 export const ValidationMonotonicDecreasing = "decreasing";
 

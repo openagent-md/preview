@@ -9,6 +9,10 @@ import (
 	"github.com/zclconf/go-cty/cty"
 )
 
+const (
+	UnknownStringValue = "??"
+)
+
 type NullHCLString struct {
 	Value string `json:"value"`
 	Valid bool   `json:"valid"`
@@ -94,7 +98,7 @@ func (s HCLString) AsString() string {
 		return *s.Source
 	}
 
-	return "??"
+	return UnknownStringValue
 }
 
 func (s HCLString) IsKnown() bool {
