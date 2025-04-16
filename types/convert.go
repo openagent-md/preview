@@ -1,15 +1,10 @@
 package types
 
 import (
-	"fmt"
-
 	"github.com/aquasecurity/trivy/pkg/iac/terraform"
+	hcty "github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	"github.com/zclconf/go-cty/cty"
-	hcty "github.com/hashicorp/go-cty/cty"
-	hctyjson "github.com/hashicorp/go-cty/cty/json"
-	ctyjson "github.com/zclconf/go-cty/cty/json"
 
 	"github.com/coder/terraform-provider-coder/v2/provider"
 )
