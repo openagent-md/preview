@@ -113,7 +113,7 @@ func (r *ParameterData) Valid() hcl.Diagnostics {
 	if diag.HasError() {
 		// TODO: We can take the attr path and decorate the error with
 		//   source information.
-		return hclDiagnostics(diag)
+		return hclDiagnostics(diag, source)
 	}
 	return nil
 }

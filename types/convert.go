@@ -1,8 +1,15 @@
 package types
 
 import (
+	"fmt"
+
+	"github.com/aquasecurity/trivy/pkg/iac/terraform"
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/zclconf/go-cty/cty"
+	hcty "github.com/hashicorp/go-cty/cty"
+	hctyjson "github.com/hashicorp/go-cty/cty/json"
+	ctyjson "github.com/zclconf/go-cty/cty/json"
 
 	"github.com/coder/terraform-provider-coder/v2/provider"
 )
@@ -44,15 +51,15 @@ func providerOption(opt *ParameterOption) provider.Option {
 	}
 }
 
-func hclDiagnostics(diagnostics diag.Diagnostics) hcl.Diagnostics {
+func hclDiagnostics(diagnostics diag.Diagnostics, source *terraform.Block) hcl.Diagnostics {
 	cpy := make(hcl.Diagnostics, 0, len(diagnostics))
 	for _, d := range diagnostics {
-		cpy = append(cpy, hclDiagnostic(d))
+		cpy = append(cpy, hclDiagnostic(d, source))
 	}
 	return cpy
 }
 
-func hclDiagnostic(d diag.Diagnostic) *hcl.Diagnostic {
+func hclDiagnostic(d diag.Diagnostic, source *terraform.Block) *hcl.Diagnostic {
 	sev := hcl.DiagInvalid
 	switch d.Severity {
 	case diag.Error:
@@ -60,11 +67,26 @@ func hclDiagnostic(d diag.Diagnostic) *hcl.Diagnostic {
 	case diag.Warning:
 		sev = hcl.DiagWarning
 	}
+
+	// This is an imperfect way to finding the source code of the error. There is 2
+	// different `cty` types at place here, the hashicorp fork and the original. So a
+	// more general solution is difficult. This is good enough for now to add more
+	// context to an error.
+	var subject *hcl.Range
+	if len(d.AttributePath) == 1 && source != nil {
+		if attr, ok := d.AttributePath[0].(hcty.GetAttrStep); ok {
+			src := source.GetAttribute(attr.Name)
+			if src != nil {
+				subject = &(src.HCLAttribute().Range)
+			}
+		}
+	}
+
 	return &hcl.Diagnostic{
 		Severity:    sev,
 		Summary:     d.Summary,
 		Detail:      d.Detail,
-		Subject:     nil,
+		Subject:     subject,
 		Context:     nil,
 		Expression:  nil,
 		EvalContext: nil,
