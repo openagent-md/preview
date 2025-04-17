@@ -2,6 +2,7 @@ package preview
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/aquasecurity/trivy/pkg/iac/terraform"
 	"github.com/hashicorp/hcl/v2"
@@ -24,6 +25,10 @@ func unexpandedCountBlocks(modules terraform.Modules) hcl.Diagnostics {
 	for _, block := range modules.GetBlocks() {
 		block := block
 
+		// Only warn on coder blocks
+		if !strings.HasPrefix(block.NameLabel(), "coder_") {
+			continue
+		}
 		if countAttr, ok := block.Attributes()["count"]; ok {
 			if block.IsExpanded() {
 				continue
