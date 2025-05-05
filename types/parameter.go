@@ -104,7 +104,7 @@ func (r *ParameterData) Valid(value HCLString) hcl.Diagnostics {
 	var valuePtr *string
 	// TODO: What to do if it is not valid?
 	if value.Valid() {
-		val := value.Value.AsString()
+		val := value.AsString()
 		valuePtr = &val
 	}
 
