@@ -30,7 +30,7 @@ func WorkspaceTags(writer io.Writer, tags types.TagBlocks) hcl.Diagnostics {
 				k, v := tag.AsStrings()
 				tableWriter.AppendRow(table.Row{k, v, ""})
 				continue
-				//diags = diags.Extend(tDiags)
+				// diags = diags.Extend(tDiags)
 				//if !diags.HasErrors() {
 				//	tableWriter.AppendRow(table.Row{k, v, ""})
 				//	continue

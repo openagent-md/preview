@@ -97,7 +97,7 @@ func (r *ParameterData) Valid(value HCLString) hcl.Diagnostics {
 	var defPtr *string
 
 	if r.DefaultValue.Valid() && r.DefaultValue.IsKnown() {
-		def := r.DefaultValue.Value.AsString()
+		def := r.DefaultValue.AsString()
 		defPtr = &def
 	}
 
