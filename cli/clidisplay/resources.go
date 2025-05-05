@@ -30,23 +30,11 @@ func WorkspaceTags(writer io.Writer, tags types.TagBlocks) hcl.Diagnostics {
 				k, v := tag.AsStrings()
 				tableWriter.AppendRow(table.Row{k, v, ""})
 				continue
-				// diags = diags.Extend(tDiags)
-				// if !diags.HasErrors() {
-				//	tableWriter.AppendRow(table.Row{k, v, ""})
-				//	continue
-				//}
 			}
 
 			k := tag.KeyString()
 			refs := tag.References()
 			tableWriter.AppendRow(table.Row{k, "??", strings.Join(refs, "\n")})
-
-			// refs := tb.AllReferences()
-			// refsStr := make([]string, 0, len(refs))
-			// for _, ref := range refs {
-			//	refsStr = append(refsStr, ref.String())
-			//}
-			// tableWriter.AppendRow(table.Row{unknown, "???", strings.Join(refsStr, "\n")})
 		}
 	}
 	_, _ = fmt.Fprintln(writer, tableWriter.Render())

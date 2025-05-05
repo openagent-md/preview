@@ -54,7 +54,7 @@ func (*RootCmd) TerraformPlan() *serpent.Command {
 
 			var indented bytes.Buffer
 			_ = json.Indent(&indented, buf.Bytes(), "", "  ")
-			//nolint:gosec
+			//nolint:gosec // these files are not a secret
 			_ = os.WriteFile("plan.json", indented.Bytes(), 0644)
 			return nil
 		},
