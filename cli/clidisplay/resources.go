@@ -30,7 +30,7 @@ func WorkspaceTags(writer io.Writer, tags types.TagBlocks) hcl.Diagnostics {
 				k, v := tag.AsStrings()
 				tableWriter.AppendRow(table.Row{k, v, ""})
 				continue
-				//diags = diags.Extend(tDiags)
+				// diags = diags.Extend(tDiags)
 				//if !diags.HasErrors() {
 				//	tableWriter.AppendRow(table.Row{k, v, ""})
 				//	continue
@@ -41,7 +41,7 @@ func WorkspaceTags(writer io.Writer, tags types.TagBlocks) hcl.Diagnostics {
 			refs := tag.References()
 			tableWriter.AppendRow(table.Row{k, "??", strings.Join(refs, "\n")})
 
-			//refs := tb.AllReferences()
+			// refs := tb.AllReferences()
 			//refsStr := make([]string, 0, len(refs))
 			//for _, ref := range refs {
 			//	refsStr = append(refsStr, ref.String())
@@ -55,7 +55,7 @@ func WorkspaceTags(writer io.Writer, tags types.TagBlocks) hcl.Diagnostics {
 
 func Parameters(writer io.Writer, params []types.Parameter, files map[string]*hcl.File) {
 	tableWriter := table.NewWriter()
-	//tableWriter.SetTitle("Parameters")
+	// tableWriter.SetTitle("Parameters")
 	tableWriter.SetStyle(table.StyleLight)
 	tableWriter.Style().Options.SeparateColumns = false
 	row := table.Row{"Parameter"}
@@ -66,7 +66,7 @@ func Parameters(writer io.Writer, params []types.Parameter, files map[string]*hc
 		if p.FormType == provider.ParameterFormTypeMultiSelect {
 			_ = json.Unmarshal([]byte(strVal), &selections)
 		}
-		//value := p.Value.Value
+		// value := p.Value.Value
 		//
 		//if value.IsNull() {
 		//	strVal = "null"

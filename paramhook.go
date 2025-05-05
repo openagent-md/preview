@@ -156,7 +156,7 @@ func isForEachKey(key cty.Value) bool {
 func evaluateCoderParameterDefault(b *terraform.Block) (cty.Value, bool) {
 	attributes := b.Attributes()
 
-	//typeAttr, exists := attributes["type"]
+	// typeAttr, exists := attributes["type"]
 	//valueType := cty.String // TODO: Default to string?
 	//if exists {
 	//	typeVal := typeAttr.Value()

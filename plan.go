@@ -23,7 +23,7 @@ func planJSONHook(dfs fs.FS, input Input) (func(ctx *tfcontext.Context, blocks t
 	var contents io.Reader = bytes.NewReader(input.PlanJSON)
 	// Also accept `{}` as an empty plan. If this is stored in postgres or another json
 	// type, then `{}` is the "empty" value.
-	if len(input.PlanJSON) == 0 || bytes.Compare(input.PlanJSON, []byte("{}")) == 0 {
+	if len(input.PlanJSON) == 0 || bytes.Equal(input.PlanJSON, []byte("{}")) {
 		if input.PlanJSONPath == "" {
 			return func(ctx *tfcontext.Context, blocks terraform.Blocks, inputVars map[string]cty.Value) {}, nil
 		}
