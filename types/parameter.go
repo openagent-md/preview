@@ -93,22 +93,35 @@ type ParameterOption struct {
 	Icon        string    `json:"icon"`
 }
 
-func (r *ParameterData) Valid() hcl.Diagnostics {
-	diag := (&provider.Parameter{
+func (r *ParameterData) Valid(value HCLString) hcl.Diagnostics {
+	var defPtr *string
+	if !r.DefaultValue.Value.IsNull() {
+		def := r.DefaultValue.Value.AsString()
+		defPtr = &def
+	}
+
+	var valuePtr *string
+	// TODO: What to do if it is not valid?
+	if value.Valid() {
+		val := value.Value.AsString()
+		valuePtr = &val
+	}
+
+	_, diag := (&provider.Parameter{
 		Name:        r.Name,
 		DisplayName: r.DisplayName,
 		Description: r.Description,
 		Type:        provider.OptionType(r.Type),
 		FormType:    r.FormType,
 		Mutable:     r.Mutable,
-		Default:     r.DefaultValue.AsString(),
+		Default:     defPtr,
 		Icon:        r.Icon,
 		Option:      providerOptions(r.Options),
 		Validation:  providerValidations(r.Validations),
 		Optional:    false,
 		Order:       int(r.Order),
 		Ephemeral:   r.Ephemeral,
-	}).Valid()
+	}).ValidateInput(valuePtr)
 
 	if diag.HasError() {
 		// TODO: We can take the attr path and decorate the error with

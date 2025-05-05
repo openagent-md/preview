@@ -50,7 +50,7 @@ func ParameterFromBlock(block *terraform.Block) (*types.Parameter, hcl.Diagnosti
 
 	pVal := richParameterValue(block)
 
-	def := types.StringLiteral("")
+	def := types.NullString()
 	defAttr := block.GetAttribute("default")
 	if !defAttr.IsNil() {
 		def = types.ToHCLString(block, defAttr)
@@ -138,45 +138,10 @@ func ParameterFromBlock(block *terraform.Block) (*types.Parameter, hcl.Diagnosti
 		p.Validations = append(p.Validations, &valid)
 	}
 
-	ctyType, err := p.CtyType()
-	if err != nil {
-		paramTypeDiag := &hcl.Diagnostic{
-			Severity: hcl.DiagError,
-			Summary:  fmt.Sprintf("Invalid parameter type %q", p.Type),
-			Detail:   err.Error(),
-			Context:  &block.HCLBlock().DefRange,
-		}
-
-		if attr := block.GetAttribute("type"); attr != nil && !attr.IsNil() {
-			paramTypeDiag.Subject = &attr.HCLAttribute().Range
-			paramTypeDiag.Expression = attr.HCLAttribute().Expr
-			paramTypeDiag.EvalContext = block.Context().Inner()
-		}
-		diags = diags.Append(paramTypeDiag)
-		p.FormType = provider.ParameterFormTypeError
-	}
-
-	if ctyType != cty.NilType && pVal.Value.Type().Equals(cty.String) {
-		// TODO: Wish we could support more types, but only string types are
-		// allowed.
-		valStr := pVal.Value.AsString()
-		// Apply validations to the parameter value
-		for _, v := range p.Validations {
-			if err := v.Valid(string(pType), valStr); err != nil {
-				diags = diags.Append(&hcl.Diagnostic{
-					Severity:   hcl.DiagError,
-					Summary:    fmt.Sprintf("Paramater validation failed for value %q", valStr),
-					Detail:     err.Error(),
-					Expression: pVal.ValueExpr,
-				})
-			}
-		}
-	}
-
 	if !diags.HasErrors() {
 		// Only do this validation if the parameter is valid, as if some errors
 		// exist, then this is likely to fail be excess information.
-		diags = diags.Extend(p.Valid())
+		diags = diags.Extend(p.Valid(p.Value))
 	}
 
 	usageDiags := ParameterUsageDiagnostics(p)
@@ -194,7 +159,9 @@ func ParameterFromBlock(block *terraform.Block) (*types.Parameter, hcl.Diagnosti
 func ParameterUsageDiagnostics(p types.Parameter) hcl.Diagnostics {
 	valErr := "The value of a parameter is required to be sourced (default or input) for the parameter to function."
 	var diags hcl.Diagnostics
-	if !p.Value.Valid() {
+	if p.Value.Value.IsNull() {
+		// Allow null values
+	} else if !p.Value.Valid() {
 		diags = diags.Append(&hcl.Diagnostic{
 			Severity:   hcl.DiagError,
 			Summary:    "Parameter value is not valid",
@@ -478,6 +445,14 @@ func richParameterValue(block *terraform.Block) types.HCLString {
 
 	val, diags := valRef.Value(block.Context().Inner())
 	source := hclext.CreateDotReferenceFromTraversal(valRef.Traversal)
+
+	// If no value attribute exists, then the value is `null`.
+	if diags.HasErrors() && diags[0].Summary == "Unsupported attribute" {
+		s := types.NullString()
+		s.Source = &source
+		return s
+	}
+
 	return types.HCLString{
 		Value:      val,
 		ValueDiags: diags,
