@@ -76,16 +76,6 @@ type ParameterValidation struct {
 	Monotonic *string `json:"validation_monotonic"`
 }
 
-// Valid takes the type of the value and the value itself and returns an error
-// if the value is invalid.
-func (v *ParameterValidation) Valid(typ string, value string) error {
-	// TODO: Validate typ is the enum?
-	// Use the provider.Validation struct to validate the value to be
-	// consistent with the provider.
-	pv := providerValidation(v)
-	return (&pv).Valid(provider.OptionType(typ), value)
-}
-
 type ParameterOption struct {
 	Name        string    `json:"name"`
 	Description string    `json:"description"`
