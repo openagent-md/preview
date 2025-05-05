@@ -95,7 +95,8 @@ type ParameterOption struct {
 
 func (r *ParameterData) Valid(value HCLString) hcl.Diagnostics {
 	var defPtr *string
-	if !r.DefaultValue.Value.IsNull() {
+
+	if r.DefaultValue.Valid() && r.DefaultValue.IsKnown() {
 		def := r.DefaultValue.Value.AsString()
 		defPtr = &def
 	}
