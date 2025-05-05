@@ -67,6 +67,7 @@ func CreateDotReferenceFromTraversal(traversals ...hcl.Traversal) string {
 			case hcl.TraverseIndex:
 				switch {
 				case part.Key.Type().Equals(cty.String):
+					//nolint:gocritic // string type asserted above
 					refParts = append(refParts, fmt.Sprintf("[%s]", part.Key.AsString()))
 				case part.Key.Type().Equals(cty.Number):
 					idx, _ := part.Key.AsBigFloat().Int64()

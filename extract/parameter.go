@@ -159,6 +159,7 @@ func ParameterFromBlock(block *terraform.Block) (*types.Parameter, hcl.Diagnosti
 	if ctyType != cty.NilType && pVal.Value.Type().Equals(cty.String) {
 		// TODO: Wish we could support more types, but only string types are
 		// allowed.
+		//nolint:gocritic // string type asserted
 		valStr := pVal.Value.AsString()
 		// Apply validations to the parameter value
 		for _, v := range p.Validations {
@@ -328,6 +329,7 @@ func requiredString(block *terraform.Block, key string) (string, *hcl.Diagnostic
 		return "", diag
 	}
 
+	// nolint:gocritic // string type asserted
 	return tyVal.AsString(), nil
 }
 
@@ -400,6 +402,7 @@ func nullableString(block *terraform.Block, key string) *string {
 		return nil
 	}
 
+	//nolint:gocritic // string type asserted
 	str := val.AsString()
 	return &str
 }
@@ -414,6 +417,7 @@ func optionalString(block *terraform.Block, key string) string {
 		return ""
 	}
 
+	//nolint:gocritic // string type asserted
 	return val.AsString()
 }
 
