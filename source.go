@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/hcl/v2"
 )
 
+//nolint:unused
 func source(r hcl.Range, files map[string]*hcl.File) ([]byte, error) {
 	file, ok := files[r.Filename]
 	if !ok {

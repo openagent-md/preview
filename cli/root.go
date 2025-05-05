@@ -106,11 +106,11 @@ func (r *RootCmd) Root() *serpent.Command {
 			clidisplay.Parameters(os.Stdout, output.Parameters, output.Files)
 
 			if !output.ModuleOutput.IsNull() && !(output.ModuleOutput.Type().IsObjectType() && output.ModuleOutput.LengthInt() == 0) {
-				fmt.Println("Module output")
+				_, _ = fmt.Println("Module output")
 				data, _ := ctyjson.Marshal(output.ModuleOutput, output.ModuleOutput.Type())
 				var buf bytes.Buffer
 				_ = json.Indent(&buf, data, "", "  ")
-				fmt.Println(buf.String())
+				_, _ = fmt.Println(buf.String())
 			}
 
 			return nil
@@ -122,6 +122,7 @@ func (r *RootCmd) Root() *serpent.Command {
 	return cmd
 }
 
+//nolint:unused
 func hclExpr(expr string) hcl.Expression {
 	file, diags := hclsyntax.ParseConfig([]byte(fmt.Sprintf(`expr = %s`, expr)), "test.tf", hcl.InitialPos)
 	if diags.HasErrors() {

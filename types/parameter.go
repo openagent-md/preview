@@ -90,7 +90,7 @@ func (v ParameterValidation) Valid(typ string, value string) error {
 		Monotonic:   orZero(v.Monotonic),
 		Regex:       orZero(v.Regex),
 		Error:       v.Error,
-	}).Valid(provider.OptionType(typ), value)
+	}).Valid(typ, value)
 }
 
 type ParameterOption struct {
