@@ -3,7 +3,6 @@ package cli
 import (
 	"bufio"
 	"context"
-	"embed"
 	"encoding/json"
 	"fmt"
 	"io/fs"
@@ -13,6 +12,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"slices"
+	"time"
 
 	"github.com/go-chi/chi"
 
@@ -24,13 +24,9 @@ import (
 	"github.com/coder/websocket"
 )
 
-//go:embed static/*
-var static embed.FS
-
 type responseRecorder struct {
 	http.ResponseWriter
-	headerWritten bool
-	logger        slog.Logger
+	logger slog.Logger
 }
 
 // Implement Hijacker interface for WebSocket support
@@ -54,7 +50,7 @@ func debugMiddleware(logger slog.Logger) func(http.Handler) http.Handler {
 	}
 }
 
-func (r *RootCmd) WebsocketServer() *serpent.Command {
+func (*RootCmd) WebsocketServer() *serpent.Command {
 	var (
 		address string
 		siteDir string
@@ -132,7 +128,7 @@ func (r *RootCmd) WebsocketServer() *serpent.Command {
 				}
 				_ = json.NewEncoder(rw).Encode(availableUsers)
 			})
-			mux.HandleFunc("/directories", func(rw http.ResponseWriter, r *http.Request) {
+			mux.HandleFunc("/directories", func(rw http.ResponseWriter, _ *http.Request) {
 				entries, err := fs.ReadDir(dataDirFS, ".")
 				if err != nil {
 					http.Error(rw, "Could not read directory", http.StatusInternalServerError)
@@ -163,9 +159,10 @@ func (r *RootCmd) WebsocketServer() *serpent.Command {
 			srv := &http.Server{
 				Addr:    address,
 				Handler: mux,
-				BaseContext: func(listener net.Listener) context.Context {
+				BaseContext: func(_ net.Listener) context.Context {
 					return ctx
 				},
+				ReadHeaderTimeout: time.Second * 30,
 			}
 
 			if siteDir != "" {
@@ -184,7 +181,6 @@ func (r *RootCmd) WebsocketServer() *serpent.Command {
 					// Kill the server if pnpm exits
 					_ = srv.Shutdown(ctx)
 				}()
-
 			}
 
 			logger.Info(ctx, "Starting server", slog.F("address", address))
@@ -197,7 +193,6 @@ func (r *RootCmd) WebsocketServer() *serpent.Command {
 
 func websocketHandler(logger slog.Logger, dirFS fs.FS) func(rw http.ResponseWriter, r *http.Request) {
 	return func(rw http.ResponseWriter, r *http.Request) {
-
 		logger.Debug(r.Context(), "WebSocket connection attempt",
 			slog.F("remote_addr", r.RemoteAddr),
 			slog.F("path", r.URL.Path),

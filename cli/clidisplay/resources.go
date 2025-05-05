@@ -30,23 +30,11 @@ func WorkspaceTags(writer io.Writer, tags types.TagBlocks) hcl.Diagnostics {
 				k, v := tag.AsStrings()
 				tableWriter.AppendRow(table.Row{k, v, ""})
 				continue
-				// diags = diags.Extend(tDiags)
-				//if !diags.HasErrors() {
-				//	tableWriter.AppendRow(table.Row{k, v, ""})
-				//	continue
-				//}
 			}
 
 			k := tag.KeyString()
 			refs := tag.References()
 			tableWriter.AppendRow(table.Row{k, "??", strings.Join(refs, "\n")})
-
-			//refs := tb.AllReferences()
-			//refsStr := make([]string, 0, len(refs))
-			//for _, ref := range refs {
-			//	refsStr = append(refsStr, ref.String())
-			//}
-			//tableWriter.AppendRow(table.Row{unknown, "???", strings.Join(refsStr, "\n")})
 		}
 	}
 	_, _ = fmt.Fprintln(writer, tableWriter.Render())
@@ -55,7 +43,6 @@ func WorkspaceTags(writer io.Writer, tags types.TagBlocks) hcl.Diagnostics {
 
 func Parameters(writer io.Writer, params []types.Parameter, files map[string]*hcl.File) {
 	tableWriter := table.NewWriter()
-	//tableWriter.SetTitle("Parameters")
 	tableWriter.SetStyle(table.StyleLight)
 	tableWriter.Style().Options.SeparateColumns = false
 	row := table.Row{"Parameter"}
@@ -66,17 +53,7 @@ func Parameters(writer io.Writer, params []types.Parameter, files map[string]*hc
 		if p.FormType == provider.ParameterFormTypeMultiSelect {
 			_ = json.Unmarshal([]byte(strVal), &selections)
 		}
-		//value := p.Value.Value
-		//
-		//if value.IsNull() {
-		//	strVal = "null"
-		//} else if !p.Value.Value.IsKnown() {
-		//	strVal = "unknown"
-		//} else if value.Type().Equals(cty.String) {
-		//	strVal = value.AsString()
-		//} else {
-		//	strVal = value.GoString()
-		//}
+
 		dp := p.DisplayName
 		if p.DisplayName == "" {
 			dp = p.Name
@@ -90,7 +67,6 @@ func Parameters(writer io.Writer, params []types.Parameter, files map[string]*hc
 			var out bytes.Buffer
 			WriteDiagnostics(&out, files, hcl.Diagnostics(p.Diagnostics))
 			tableWriter.AppendRow(table.Row{out.String()})
-
 		}
 
 		tableWriter.AppendSeparator()
@@ -104,29 +80,29 @@ func formatOptions(selected []string, options []*types.ParameterOption) string {
 	found := false
 
 	for _, opt := range options {
-		str.WriteString(sep)
+		_, _ = str.WriteString(sep)
 		prefix := "[ ]"
 		if slices.Contains(selected, opt.Value.AsString()) {
 			prefix = "[X]"
 			found = true
 		}
 
-		str.WriteString(fmt.Sprintf("%s %s (%s)", prefix, opt.Name, opt.Value.AsString()))
+		_, _ = str.WriteString(fmt.Sprintf("%s %s (%s)", prefix, opt.Name, opt.Value.AsString()))
 		if opt.Description != "" {
-			str.WriteString(fmt.Sprintf("\n    %s", maxLength(opt.Description, 25)))
+			_, _ = str.WriteString(fmt.Sprintf("\n    %s", maxLength(opt.Description, 25)))
 		}
 		sep = "\n"
 	}
 	if !found {
-		str.WriteString(sep)
-		str.WriteString(fmt.Sprintf("= %s", selected))
+		_, _ = str.WriteString(sep)
+		_, _ = str.WriteString(fmt.Sprintf("= %s", selected))
 	}
 	return str.String()
 }
 
-func maxLength(s string, max int) string {
-	if len(s) > max {
-		return s[:max] + "..."
+func maxLength(s string, m int) string {
+	if len(s) > m {
+		return s[:m] + "..."
 	}
 	return s
 }

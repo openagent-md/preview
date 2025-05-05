@@ -15,7 +15,7 @@ import (
 // is resolvable. The resolvable parameter will be accessible on the next
 // iteration.
 func parameterContextsEvalHook(input Input) func(ctx *tfcontext.Context, blocks terraform.Blocks, inputVars map[string]cty.Value) {
-	return func(ctx *tfcontext.Context, blocks terraform.Blocks, inputVars map[string]cty.Value) {
+	return func(ctx *tfcontext.Context, blocks terraform.Blocks, _ map[string]cty.Value) {
 		data := blocks.OfType("data")
 		for _, block := range data {
 			if block.TypeLabel() != "coder_parameter" {
@@ -32,6 +32,7 @@ func parameterContextsEvalHook(input Input) func(ctx *tfcontext.Context, blocks 
 				continue // Ignore the errors at this point
 			}
 
+			//nolint:gocritic // string type asserted
 			name := nameVal.AsString()
 			var value cty.Value
 			pv, ok := input.RichParameterValue(name)
@@ -156,9 +157,9 @@ func isForEachKey(key cty.Value) bool {
 func evaluateCoderParameterDefault(b *terraform.Block) (cty.Value, bool) {
 	attributes := b.Attributes()
 
-	//typeAttr, exists := attributes["type"]
-	//valueType := cty.String // TODO: Default to string?
-	//if exists {
+	// typeAttr, exists := attributes["type"]
+	// valueType := cty.String // TODO: Default to string?
+	// if exists {
 	//	typeVal := typeAttr.Value()
 	//	if !typeVal.Type().Equals(cty.String) || !typeVal.IsWhollyKnown() {
 	//		// TODO: Mark this value somehow
@@ -187,7 +188,7 @@ func evaluateCoderParameterDefault(b *terraform.Block) (cty.Value, bool) {
 	//
 	//// TODO: We should support different tf types, but at present the tf
 	//// schema is static. So only string is allowed
-	//var val cty.Value
+	// var val cty.Value
 
 	def, exists := attributes["default"]
 	if !exists {

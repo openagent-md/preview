@@ -5,8 +5,9 @@ import (
 	"log"
 	"os"
 
-	"github.com/coder/preview/cli"
 	"github.com/hashicorp/hcl/v2"
+
+	"github.com/coder/preview/cli"
 )
 
 func main() {
@@ -29,6 +30,5 @@ func main() {
 			}
 		}
 		log.Fatal(err.Error())
-		os.Exit(1)
 	}
 }

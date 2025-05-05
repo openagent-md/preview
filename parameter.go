@@ -39,7 +39,7 @@ func parameters(modules terraform.Modules) ([]types.Parameter, hcl.Diagnostics) 
 		var detail strings.Builder
 		for _, p := range v {
 			if p.Source != nil {
-				detail.WriteString(fmt.Sprintf("block %q at %s\n",
+				_, _ = detail.WriteString(fmt.Sprintf("block %q at %s\n",
 					p.Source.Type()+"."+strings.Join(p.Source.Labels(), "."),
 					p.Source.HCLBlock().TypeRange))
 			}

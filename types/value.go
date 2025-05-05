@@ -88,6 +88,7 @@ func (s HCLString) AsString() string {
 	if s.Valid() && s.Value.IsKnown() {
 		switch {
 		case s.Value.Type().Equals(cty.String):
+			//nolint:gocritic // string type asserted
 			return s.Value.AsString()
 		case s.Value.Type().Equals(cty.Number):
 			// TODO: Float vs Int?

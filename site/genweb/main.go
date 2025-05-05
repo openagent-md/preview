@@ -59,6 +59,7 @@ func main() {
 	}
 
 	if outFile != nil {
+		//nolint:gosec
 		_ = os.WriteFile(*outFile, []byte(output), 0644)
 	} else {
 		_, _ = fmt.Println(output)

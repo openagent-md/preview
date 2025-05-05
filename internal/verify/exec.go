@@ -129,7 +129,7 @@ func InstallTerraforms(ctx context.Context, t *testing.T, installables ...src.In
 	return execPaths
 }
 
-func LatestTerraformVersion(ctx context.Context) *releases.LatestVersion {
+func LatestTerraformVersion(_ context.Context) *releases.LatestVersion {
 	return &releases.LatestVersion{
 		Product: product.Terraform,
 	}
@@ -158,10 +158,10 @@ func TerraformVersions(ctx context.Context, constraints version.Constraints) ([]
 	}
 
 	include := make([]*releases.ExactVersion, 0)
-	for _, src := range srcs {
-		ev, ok := src.(*releases.ExactVersion)
+	for _, s := range srcs {
+		ev, ok := s.(*releases.ExactVersion)
 		if !ok {
-			return nil, fmt.Errorf("failed to cast src to ExactVersion, type was %T", src)
+			return nil, fmt.Errorf("failed to cast src to ExactVersion, type was %T", s)
 		}
 
 		include = append(include, ev)
@@ -212,7 +212,7 @@ func CopyTFFS(dir string, fsys fs.FS) error {
 		}
 
 		if _, err := io.Copy(w, r); err != nil {
-			w.Close()
+			_ = w.Close()
 			return &os.PathError{Op: "Copy", Path: newPath, Err: err}
 		}
 		return w.Close()

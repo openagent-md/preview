@@ -23,9 +23,9 @@ func planJSONHook(dfs fs.FS, input Input) (func(ctx *tfcontext.Context, blocks t
 	var contents io.Reader = bytes.NewReader(input.PlanJSON)
 	// Also accept `{}` as an empty plan. If this is stored in postgres or another json
 	// type, then `{}` is the "empty" value.
-	if len(input.PlanJSON) == 0 || bytes.Compare(input.PlanJSON, []byte("{}")) == 0 {
+	if len(input.PlanJSON) == 0 || bytes.Equal(input.PlanJSON, []byte("{}")) {
 		if input.PlanJSONPath == "" {
-			return func(ctx *tfcontext.Context, blocks terraform.Blocks, inputVars map[string]cty.Value) {}, nil
+			return func(_ *tfcontext.Context, _ terraform.Blocks, _ map[string]cty.Value) {}, nil
 		}
 
 		var err error
@@ -40,7 +40,7 @@ func planJSONHook(dfs fs.FS, input Input) (func(ctx *tfcontext.Context, blocks t
 		return nil, fmt.Errorf("unable to parse plan JSON: %w", err)
 	}
 
-	return func(ctx *tfcontext.Context, blocks terraform.Blocks, inputVars map[string]cty.Value) {
+	return func(_ *tfcontext.Context, blocks terraform.Blocks, _ map[string]cty.Value) {
 		loaded := make(map[*tfjson.StateModule]bool)
 
 		// Do not recurse to child blocks.
@@ -108,22 +108,6 @@ func priorPlanModule(plan *tfjson.Plan, block *terraform.Block) *tfjson.StateMod
 	}
 
 	return current
-}
-
-func matchingBlock(block *terraform.Block, planMod *tfjson.StateModule) *tfjson.StateResource {
-	ref := block.Reference()
-	matchKey := keyMatcher(ref.RawKey())
-
-	for _, resource := range planMod.Resources {
-		if ref.BlockType().ShortName() == string(resource.Mode) &&
-			ref.TypeLabel() == resource.Type &&
-			ref.NameLabel() == resource.Name &&
-			matchKey(resource.Index) {
-
-			return resource
-		}
-	}
-	return nil
 }
 
 func loadResourcesToContext(ctx *tfcontext.Context, resources []*tfjson.StateResource) error {
@@ -224,24 +208,7 @@ func parsePlanJSON(reader io.Reader) (*tfjson.Plan, error) {
 	return plan, json.NewDecoder(reader).Decode(plan)
 }
 
-func keyMatcher(key cty.Value) func(to any) bool {
-	switch {
-	case key.Type().Equals(cty.Number):
-		idx, _ := key.AsBigFloat().Int64()
-		return func(to any) bool {
-			asInt, ok := toInt(to)
-			return ok && asInt == idx
-		}
-
-	case key.Type().Equals(cty.String):
-		// TODO: handle key strings
-	}
-
-	return func(to any) bool {
-		return true
-	}
-}
-
+//nolint:gosec // Maybe handle overflow at some point
 func toInt(to any) (int64, bool) {
 	switch typed := to.(type) {
 	case uint:

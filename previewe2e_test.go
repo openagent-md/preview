@@ -47,7 +47,7 @@ import (
 // The goal of the test is to compare `tfstate` with the output of `preview`.
 // If `preview`'s implementation of terraform is incorrect, the test will fail.
 // TODO: Adding varied parameter inputs would be a good idea.
-// TODO: Add workspace tag comparisions.
+// TODO: Add workspace tag comparisons.
 func Test_VerifyE2E(t *testing.T) {
 	t.Parallel()
 
@@ -80,7 +80,7 @@ func Test_VerifyE2E(t *testing.T) {
 			continue
 		}
 
-		entryFiles, err := fs.ReadDir(dirFs, filepath.Join(entry.Name()))
+		entryFiles, err := fs.ReadDir(dirFs, entry.Name())
 		require.NoError(t, err, "reading test data dir")
 		if !slices.ContainsFunc(entryFiles, func(entry fs.DirEntry) bool {
 			return filepath.Ext(entry.Name()) == ".tf"
@@ -135,8 +135,9 @@ func Test_VerifyE2E(t *testing.T) {
 					require.NoError(t, err, "terraform show plan")
 
 					pd, err := json.Marshal(plan)
-					require.NoError(t, err, "marshalling plan")
+					require.NoError(t, err, "marshaling plan")
 
+					//nolint:gosec // unit test
 					err = os.WriteFile(filepath.Join(wp, "plan.json"), pd, 0644)
 					require.NoError(t, err, "writing plan.json")
 
