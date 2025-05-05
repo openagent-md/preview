@@ -1,13 +1,17 @@
-package types
+package types_test
 
 import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
+
+	"github.com/coder/preview/types"
 )
 
 func TestToCtyValue(t *testing.T) {
-	owner := WorkspaceOwner{
+	t.Parallel()
+
+	owner := types.WorkspaceOwner{
 		ID:           "f6457744-3e16-45b2-b3b0-80c2df491c99",
 		Name:         "Nissa",
 		FullName:     "Nissa, Worldwaker",
@@ -15,7 +19,7 @@ func TestToCtyValue(t *testing.T) {
 		SSHPublicKey: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBSHXs/HCgZlpEBOXLvLw4KaOrhy1DM1Vw6M/HPVE/UA\n",
 		Groups:       []string{"Everyone", "Planeswalkers", "Green"},
 		LoginType:    "password",
-		RBACRoles: []WorkspaceOwnerRBACRole{
+		RBACRoles: []types.WorkspaceOwnerRBACRole{
 			{Name: "User Admin"},
 			{Name: "Organization User Admin", OrgID: "5af9253a-ecde-4a71-b8f5-c8d15be9e52b"},
 		},
@@ -38,7 +42,9 @@ func TestToCtyValue(t *testing.T) {
 }
 
 func TestToCtyValueWithNilLists(t *testing.T) {
-	owner := WorkspaceOwner{
+	t.Parallel()
+
+	owner := types.WorkspaceOwner{
 		ID:           "f6457744-3e16-45b2-b3b0-80c2df491c99",
 		Name:         "Nissa",
 		FullName:     "Nissa, Worldwaker",

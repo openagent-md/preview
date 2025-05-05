@@ -80,7 +80,7 @@ func Test_VerifyE2E(t *testing.T) {
 			continue
 		}
 
-		entryFiles, err := fs.ReadDir(dirFs, filepath.Join(entry.Name()))
+		entryFiles, err := fs.ReadDir(dirFs, entry.Name())
 		require.NoError(t, err, "reading test data dir")
 		if !slices.ContainsFunc(entryFiles, func(entry fs.DirEntry) bool {
 			return filepath.Ext(entry.Name()) == ".tf"
@@ -137,6 +137,7 @@ func Test_VerifyE2E(t *testing.T) {
 					pd, err := json.Marshal(plan)
 					require.NoError(t, err, "marshaling plan")
 
+					//nolint:gosec // unit test
 					err = os.WriteFile(filepath.Join(wp, "plan.json"), pd, 0644)
 					require.NoError(t, err, "writing plan.json")
 

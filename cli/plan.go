@@ -10,7 +10,7 @@ import (
 	"github.com/coder/serpent"
 )
 
-func (r *RootCmd) TerraformPlan() *serpent.Command {
+func (*RootCmd) TerraformPlan() *serpent.Command {
 	cmd := &serpent.Command{
 		Use:   "plan",
 		Short: "Runs `terraform init -upgrade` and `terraform plan`, saving the output.",
@@ -54,6 +54,7 @@ func (r *RootCmd) TerraformPlan() *serpent.Command {
 
 			var indented bytes.Buffer
 			_ = json.Indent(&indented, buf.Bytes(), "", "  ")
+			//nolint:gosec
 			_ = os.WriteFile("plan.json", indented.Bytes(), 0644)
 			return nil
 		},

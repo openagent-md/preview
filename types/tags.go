@@ -87,7 +87,7 @@ func (t Tag) KeyString() string {
 	return t.Key.AsString()
 }
 
-func (t Tag) AsStrings() (string, string) {
+func (t Tag) AsStrings() (key string, value string) {
 	return t.KeyString(), t.Value.AsString()
 }
 

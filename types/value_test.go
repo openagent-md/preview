@@ -82,6 +82,8 @@ func TestSafeHCLString(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+
 			require.Equal(t, tc.asString, tc.input.AsString())
 			require.Equal(t, tc.known, tc.input.IsKnown(), "known")
 			require.Equal(t, tc.valid, tc.input.Valid(), "valid")

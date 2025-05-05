@@ -14,6 +14,8 @@ func TestPlanJSONHook(t *testing.T) {
 	t.Parallel()
 
 	t.Run("Empty plan", func(t *testing.T) {
+		t.Parallel()
+
 		dirFS := os.DirFS("testdata/static")
 		_, diags := preview.Preview(t.Context(), preview.Input{
 			PlanJSONPath:    "",

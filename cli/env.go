@@ -10,7 +10,7 @@ import (
 	"github.com/coder/serpent"
 )
 
-func (r *RootCmd) SetEnv() *serpent.Command {
+func (*RootCmd) SetEnv() *serpent.Command {
 	var (
 		vars   []string
 		groups []string
@@ -38,7 +38,7 @@ func (r *RootCmd) SetEnv() *serpent.Command {
 			},
 		},
 		Hidden: false,
-		Handler: func(i *serpent.Invocation) error {
+		Handler: func(_ *serpent.Invocation) error {
 			for _, val := range vars {
 				parts := strings.Split(val, "=")
 				if len(parts) != 2 {
@@ -49,7 +49,7 @@ func (r *RootCmd) SetEnv() *serpent.Command {
 				if err != nil {
 					return err
 				}
-				fmt.Println("CODER_PARAMETER_" + hex.EncodeToString(sum[:]) + "=" + parts[1])
+				_, _ = fmt.Println("CODER_PARAMETER_" + hex.EncodeToString(sum[:]) + "=" + parts[1])
 			}
 
 			return nil

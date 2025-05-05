@@ -504,12 +504,14 @@ func (a assertParam) optVals(opts ...string) assertParam {
 	})
 }
 
+//nolint:unused
 func (a assertParam) opts(opts ...types.ParameterOption) assertParam {
 	return a.extend(func(t *testing.T, parameter types.Parameter) {
 		assert.ElementsMatch(t, opts, parameter.Options, "parameter options equality check")
 	})
 }
 
+//nolint:revive
 func (a assertParam) extend(f assertParam) assertParam {
 	if a == nil {
 		a = func(t *testing.T, parameter types.Parameter) {}

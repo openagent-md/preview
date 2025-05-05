@@ -59,7 +59,7 @@ func Preview(ctx context.Context, input Input, dir fs.FS) (output *Output, diagn
 	// TODO: Fix logging. There is no way to pass in an instanced logger to
 	//   the parser.
 	// slog.SetLogLoggerLevel(slog.LevelDebug)
-	//slog.SetDefault(slog.New(log.NewHandler(os.Stderr, nil)))
+	// slog.SetDefault(slog.New(log.NewHandler(os.Stderr, nil)))
 
 	varFiles, err := tfVarFiles("", dir)
 	if err != nil {

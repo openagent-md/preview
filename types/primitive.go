@@ -42,9 +42,8 @@ func CtyValueString(val cty.Value) (string, error) {
 	case cty.Bool:
 		if val.True() {
 			return "true", nil
-		} else {
-			return "false", nil
 		}
+		return "false", nil
 	case cty.Number:
 		return val.AsBigFloat().String(), nil
 	case cty.String:

@@ -48,7 +48,7 @@ func workspaceTags(modules terraform.Modules, files map[string]*hcl.File) (types
 			}
 
 			// tagsObj, ok := tagsAttr.HCLAttribute().Expr.(*hclsyntax.ObjectConsExpr)
-			//if !ok {
+			// if !ok {
 			//	diags = diags.Append(&hcl.Diagnostic{
 			//		Severity: hcl.DiagError,
 			//		Summary:  "Incorrect type for \"tags\" attribute",
@@ -95,16 +95,16 @@ func workspaceTags(modules terraform.Modules, files map[string]*hcl.File) (types
 }
 
 // newTag creates a workspace tag from its hcl expression.
-func newTag(srcRange *hcl.Range, files map[string]*hcl.File, key, val cty.Value) (types.Tag, *hcl.Diagnostic) {
+func newTag(srcRange *hcl.Range, _ map[string]*hcl.File, key, val cty.Value) (types.Tag, *hcl.Diagnostic) {
 	// key, kdiags := expr.KeyExpr.Value(evCtx)
-	//val, vdiags := expr.ValueExpr.Value(evCtx)
+	// val, vdiags := expr.ValueExpr.Value(evCtx)
 
 	// TODO: ???
 
 	// if kdiags.HasErrors() {
 	//	key = cty.UnknownVal(cty.String)
 	//}
-	//if vdiags.HasErrors() {
+	// if vdiags.HasErrors() {
 	//	val = cty.UnknownVal(cty.String)
 	//}
 
@@ -151,13 +151,13 @@ func newTag(srcRange *hcl.Range, files map[string]*hcl.File, key, val cty.Value)
 	}
 
 	// ks, err := source(expr.KeyExpr.Range(), files)
-	//if err == nil {
+	// if err == nil {
 	//	src := string(ks)
 	//	tag.Key.Source = &src
 	//}
 	//
-	//vs, err := source(expr.ValueExpr.Range(), files)
-	//if err == nil {
+	// vs, err := source(expr.ValueExpr.Range(), files)
+	// if err == nil {
 	//	src := string(vs)
 	//	tag.Value.Source = &src
 	//}

@@ -25,7 +25,6 @@ func (s *Session) Listen(ctx context.Context, conn *websocket.Conn) {
 	// Always close the connection at the end of the Listen.
 	defer conn.Close(websocket.StatusNormalClosure, "closing connection")
 	<-ctx.Done()
-	return
 }
 
 func (s *Session) readLoop(ctx context.Context, cancel func(), conn *websocket.Conn) {

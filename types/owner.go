@@ -56,7 +56,7 @@ func (o *WorkspaceOwner) ToCtyValue() (cty.Value, error) {
 		)),
 	}))
 	if err != nil {
-		return cty.Value{}, xerrors.Errorf("failed to convert owner value", err)
+		return cty.Value{}, xerrors.Errorf("failed to convert owner value: %w", err)
 	}
 	return ownerValue, nil
 }
