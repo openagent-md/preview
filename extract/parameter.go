@@ -50,10 +50,12 @@ func ParameterFromBlock(block *terraform.Block) (*types.Parameter, hcl.Diagnosti
 
 	pVal := richParameterValue(block)
 
+	requiredValue := true
 	def := types.NullString()
 	defAttr := block.GetAttribute("default")
 	if !defAttr.IsNil() {
 		def = types.ToHCLString(block, defAttr)
+		requiredValue = false
 	}
 
 	ftmeta := optionalString(block, "styling")
@@ -77,7 +79,7 @@ func ParameterFromBlock(block *terraform.Block) (*types.Parameter, hcl.Diagnosti
 			Icon:         optionalString(block, "icon"),
 			Options:      make([]*types.ParameterOption, 0),
 			Validations:  make([]*types.ParameterValidation, 0),
-			Required:     optionalBoolean(block, "required"),
+			Required:     requiredValue,
 			DisplayName:  optionalString(block, "display_name"),
 			Order:        optionalInteger(block, "order"),
 			Ephemeral:    optionalBoolean(block, "ephemeral"),

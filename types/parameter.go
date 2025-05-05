@@ -118,7 +118,7 @@ func (r *ParameterData) Valid(value HCLString) hcl.Diagnostics {
 		Icon:        r.Icon,
 		Option:      providerOptions(r.Options),
 		Validation:  providerValidations(r.Validations),
-		Optional:    false,
+		Optional:    !r.Required,
 		Order:       int(r.Order),
 		Ephemeral:   r.Ephemeral,
 	}).ValidateInput(valuePtr)
