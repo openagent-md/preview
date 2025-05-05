@@ -3,13 +3,12 @@ package types
 import (
 	"testing"
 
-	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
 )
 
 func TestToCtyValue(t *testing.T) {
 	owner := WorkspaceOwner{
-		ID:           uuid.MustParse("f6457744-3e16-45b2-b3b0-80c2df491c99"),
+		ID:           "f6457744-3e16-45b2-b3b0-80c2df491c99",
 		Name:         "Nissa",
 		FullName:     "Nissa, Worldwaker",
 		Email:        "nissa@coder.com",
@@ -18,14 +17,14 @@ func TestToCtyValue(t *testing.T) {
 		LoginType:    "password",
 		RBACRoles: []WorkspaceOwnerRBACRole{
 			{Name: "User Admin"},
-			{Name: "Organization User Admin", OrgID: uuid.MustParse("5af9253a-ecde-4a71-b8f5-c8d15be9e52b")},
+			{Name: "Organization User Admin", OrgID: "5af9253a-ecde-4a71-b8f5-c8d15be9e52b"},
 		},
 	}
 
 	ownerValue, err := owner.ToCtyValue()
 	require.NoError(t, err)
 
-	require.Equal(t, owner.ID.String(), ownerValue.AsValueMap()["id"].AsString())
+	require.Equal(t, owner.ID, ownerValue.AsValueMap()["id"].AsString())
 	require.Equal(t, owner.Name, ownerValue.AsValueMap()["name"].AsString())
 	require.Equal(t, owner.SSHPublicKey, ownerValue.AsValueMap()["ssh_public_key"].AsString())
 	for i, it := range owner.Groups {
@@ -34,13 +33,13 @@ func TestToCtyValue(t *testing.T) {
 	for i, it := range owner.RBACRoles {
 		roleValueMap := ownerValue.AsValueMap()["rbac_roles"].AsValueSlice()[i].AsValueMap()
 		require.Equal(t, it.Name, roleValueMap["name"].AsString())
-		require.Equal(t, it.OrgID.String(), roleValueMap["org_id"].AsString())
+		require.Equal(t, it.OrgID, roleValueMap["org_id"].AsString())
 	}
 }
 
 func TestToCtyValueWithNilLists(t *testing.T) {
 	owner := WorkspaceOwner{
-		ID:           uuid.MustParse("f6457744-3e16-45b2-b3b0-80c2df491c99"),
+		ID:           "f6457744-3e16-45b2-b3b0-80c2df491c99",
 		Name:         "Nissa",
 		FullName:     "Nissa, Worldwaker",
 		Email:        "nissa@coder.com",

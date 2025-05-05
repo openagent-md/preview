@@ -6,12 +6,13 @@ import (
 	"github.com/aquasecurity/trivy/pkg/iac/terraform"
 	tfcontext "github.com/aquasecurity/trivy/pkg/iac/terraform/context"
 	"github.com/zclconf/go-cty/cty"
+	"golang.org/x/xerrors"
 )
 
-func workspaceOwnerHook(dfs fs.FS, input Input) (func(ctx *tfcontext.Context, blocks terraform.Blocks, inputVars map[string]cty.Value), error) {
+func workspaceOwnerHook(_ fs.FS, input Input) (func(ctx *tfcontext.Context, blocks terraform.Blocks, inputVars map[string]cty.Value), error) {
 	ownerValue, err := input.Owner.ToCtyValue()
 	if err != nil {
-		return nil, err
+		return nil, xerrors.Errorf("failed to convert owner value", err)
 	}
 
 	return func(ctx *tfcontext.Context, blocks terraform.Blocks, inputVars map[string]cty.Value) {

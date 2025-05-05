@@ -14,7 +14,8 @@
 <br>
 <br>
 
-[Quickstart](#quickstart) | [Docs](https://coder.com/docs) |
+[Coder Repo](https://github.com/coder/coder) |
+[Docs](https://coder.com/docs) |
 [Why Coder](https://coder.com/why) |
 [Premium](https://coder.com/pricing#compare-plans)
 
@@ -27,14 +28,18 @@
 
 </div>
 
-This repository contains a component of Coder that handles workspace parameter
-management via Terraform. It's responsible for extracting and managing
+This repository contains a component of Coder, currently called Preview, that extracts and manages
 [workspace parameters](https://coder.com/docs/admin/templates/extending-templates/parameters)
-from Terraform configurations, supporting [Coder's](https://coder.com) core
-functionality of creating cloud development environments (like EC2 VMs,
-Kubernetes Pods, and Docker containers).
+from Terraform configurations.
 
-The primary repository for Coder is [here](https://github.com/coder/coder).
+It provides real-time validation to verify user selections and compatibility while presenting dynamic form controls that
+adapt based on previous choices.
+
+As users select parameters from the template, Preview validates the selection for compatibility and user entitlements.
+The form updates other fields based on the selections and only shows relevant and compatible options.
+
+Once Preview is incorporated in Coder, it will allow template admins to use a variety of form controls with dependencies
+from which users can deploy their ideal workspaces.
 
 <!--Should update this with the new cool form options -->
 <p align="center">
