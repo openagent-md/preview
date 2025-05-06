@@ -112,7 +112,7 @@ func (r *ParameterData) Valid(value HCLString) hcl.Diagnostics {
 		Optional:    !r.Required,
 		Order:       int(r.Order),
 		Ephemeral:   r.Ephemeral,
-	}).ValidateInput(valuePtr)
+	}).ValidateInput(valuePtr, nil) // TODO: Pass in previous value
 
 	if diag.HasError() {
 		// TODO: We can take the attr path and decorate the error with
