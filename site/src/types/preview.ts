@@ -35,8 +35,7 @@ export interface ParameterData {
     readonly type: ParameterType;
     // this is likely an enum in an external package "github.com/coder/terraform-provider-coder/v2/provider.ParameterFormType"
     readonly form_type: string;
-    // empty interface{} type, falling back to unknown
-    readonly styling: unknown;
+    readonly styling: ParameterStyling;
     readonly mutable: boolean;
     readonly default_value: NullHCLString;
     readonly icon: string;
@@ -53,6 +52,13 @@ export interface ParameterOption {
     readonly description: string;
     readonly value: NullHCLString;
     readonly icon: string;
+}
+
+// From types/parameter.go
+export interface ParameterStyling {
+    readonly placeholder?: string;
+    readonly disabled?: boolean;
+    readonly label?: string;
 }
 
 // From types/enum.go

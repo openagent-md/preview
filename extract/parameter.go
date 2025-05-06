@@ -59,7 +59,7 @@ func ParameterFromBlock(block *terraform.Block) (*types.Parameter, hcl.Diagnosti
 	}
 
 	ftmeta := optionalString(block, "styling")
-	formTypeMeta := make(map[string]any)
+	var formTypeMeta types.ParameterStyling
 	if ftmeta != "" {
 		_ = json.Unmarshal([]byte(ftmeta), &formTypeMeta)
 	}
