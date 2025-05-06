@@ -54,11 +54,11 @@ func ParameterFromState(block *tfjson.StateResource) (types.Parameter, error) {
 	}
 
 	ftmeta := st.optionalString("styling")
-	var formTypeMeta any
+	var formTypeMeta types.ParameterStyling
 	if ftmeta != "" {
 		_ = json.Unmarshal([]byte(ftmeta), &formTypeMeta)
 	} else {
-		formTypeMeta = map[string]any{}
+		formTypeMeta = types.ParameterStyling{}
 	}
 
 	param := types.Parameter{
