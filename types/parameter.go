@@ -50,7 +50,7 @@ type ParameterData struct {
 	Description  string                     `json:"description"`
 	Type         ParameterType              `json:"type"`
 	FormType     provider.ParameterFormType `json:"form_type"`
-	Styling      any                        `json:"styling"`
+	Styling      ParameterStyling           `json:"styling"`
 	Mutable      bool                       `json:"mutable"`
 	DefaultValue HCLString                  `json:"default_value"`
 	Icon         string                     `json:"icon"`
@@ -74,6 +74,12 @@ type ParameterValidation struct {
 	Max       *int64  `json:"validation_max"`
 	Monotonic *string `json:"validation_monotonic"`
 	Invalid   *bool   `json:"validation_invalid"`
+}
+
+type ParameterStyling struct {
+	Placeholder *string `json:"placeholder,omitempty"`
+	Disabled    *bool   `json:"disabled,omitempty"`
+	Label       *string `json:"label,omitempty"`
 }
 
 // Valid takes the type of the value and the value itself and returns an error
