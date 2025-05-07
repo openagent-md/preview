@@ -3,9 +3,12 @@ package types
 import (
 	"fmt"
 	"strings"
+
+	"github.com/coder/terraform-provider-coder/v2/provider"
 )
 
-type ParameterType string
+// TODO: Just use the provider type directly.
+type ParameterType provider.OptionType
 
 const (
 	ParameterTypeString     ParameterType = "string"

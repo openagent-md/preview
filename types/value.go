@@ -73,6 +73,14 @@ func StringLiteral(s string) HCLString {
 	}
 }
 
+func NullString() HCLString {
+	v := cty.NullVal(cty.String)
+	return HCLString{
+		Value:     v,
+		ValueExpr: &hclsyntax.LiteralValueExpr{Val: v},
+	}
+}
+
 // AsString is a safe function. It will always return a string.
 // The caller should check if this value is Valid and known before
 // calling this function.

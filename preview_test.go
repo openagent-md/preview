@@ -212,6 +212,16 @@ func Test_Extract(t *testing.T) {
 			params:      map[string]assertParam{},
 		},
 		{
+			name:        "empty default",
+			dir:         "emptydefault",
+			expTags:     map[string]string{},
+			input:       preview.Input{},
+			unknownTags: []string{},
+			params: map[string]assertParam{
+				"word": ap(),
+			},
+		},
+		{
 			name:    "many modules",
 			dir:     "manymodules",
 			expTags: map[string]string{},

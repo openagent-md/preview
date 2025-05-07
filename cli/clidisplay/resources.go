@@ -43,7 +43,6 @@ func WorkspaceTags(writer io.Writer, tags types.TagBlocks) hcl.Diagnostics {
 
 func Parameters(writer io.Writer, params []types.Parameter, files map[string]*hcl.File) {
 	tableWriter := table.NewWriter()
-	// tableWriter.SetTitle("Parameters")
 	tableWriter.SetStyle(table.StyleLight)
 	tableWriter.Style().Options.SeparateColumns = false
 	row := table.Row{"Parameter"}
@@ -54,20 +53,14 @@ func Parameters(writer io.Writer, params []types.Parameter, files map[string]*hc
 		if p.FormType == provider.ParameterFormTypeMultiSelect {
 			_ = json.Unmarshal([]byte(strVal), &selections)
 		}
-		// value := p.Value.Value
-		//
-		// if value.IsNull() {
-		//	strVal = "null"
-		// } else if !p.Value.Value.IsKnown() {
-		//	strVal = "unknown"
-		// } else if value.Type().Equals(cty.String) {
-		//	strVal = value.AsString()
-		// } else {
-		//	strVal = value.GoString()
-		//}
+
+		dp := p.DisplayName
+		if p.DisplayName == "" {
+			dp = p.Name
+		}
 
 		tableWriter.AppendRow(table.Row{
-			fmt.Sprintf("(%s) %s: %s\n%s", p.DisplayName, p.Name, p.Description, formatOptions(selections, p.Options)),
+			fmt.Sprintf("(%s) %s: %s\n%s", dp, p.Name, p.Description, formatOptions(selections, p.Options)),
 		})
 
 		if hcl.Diagnostics(p.Diagnostics).HasErrors() {
