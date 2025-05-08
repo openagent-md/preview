@@ -5,8 +5,11 @@ import (
 	"encoding/json"
 	"os"
 	"path/filepath"
+	"regexp"
+	"slices"
 	"testing"
 
+	"github.com/hashicorp/hcl/v2"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
@@ -38,6 +41,7 @@ func Test_Extract(t *testing.T) {
 		expTags     map[string]string
 		unknownTags []string
 		params      map[string]assertParam
+		warnings    []*regexp.Regexp
 	}{
 		{
 			name:        "bad param values",
@@ -403,6 +407,19 @@ func Test_Extract(t *testing.T) {
 			},
 		},
 		{
+			name:    "missing_module",
+			dir:     "missingmodule",
+			expTags: map[string]string{},
+			input: preview.Input{
+				ParameterValues: map[string]string{},
+			},
+			unknownTags: []string{},
+			params:      map[string]assertParam{},
+			warnings: []*regexp.Regexp{
+				regexp.MustCompile("Module not loaded"),
+			},
+		},
+		{
 			skip:    "skip until https://github.com/aquasecurity/trivy/pull/8479 is resolved",
 			name:    "submodcount",
 			dir:     "submodcount",
@@ -439,6 +456,16 @@ func Test_Extract(t *testing.T) {
 				t.Logf("diags: %s", diags)
 			}
 			require.False(t, diags.HasErrors())
+
+			if len(tc.warnings) > 0 {
+				for _, w := range tc.warnings {
+					idx := slices.IndexFunc(diags, func(diagnostic *hcl.Diagnostic) bool {
+						return w.MatchString(diagnostic.Error())
+
+					})
+					require.Greater(t, idx, -1, "expected warning %q to be present in diags", w.String())
+				}
+			}
 
 			// Assert tags
 			validTags := output.WorkspaceTags.Tags()

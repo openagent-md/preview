@@ -11,6 +11,57 @@ import (
 func warnings(modules terraform.Modules) hcl.Diagnostics {
 	var diags hcl.Diagnostics
 	diags = diags.Extend(unexpandedCountBlocks(modules))
+	diags = diags.Extend(unresolvedModules(modules))
+
+	return diags
+}
+
+// unresolvedModules does a best effort to try and detect if some modules
+// failed to resolve. This is usually because `terraform init` is not run.
+func unresolvedModules(modules terraform.Modules) hcl.Diagnostics {
+	var diags hcl.Diagnostics
+	modulesUsed := make(map[string]bool)
+	modulesByID := make(map[string]*terraform.Block)
+
+	// There is no easy way to know if a `module` failed to resolve. The failure is
+	// only logged in the trivy package. No errors are returned to the caller. So
+	// instead this code will infer a failed resolution by checking if any blocks
+	// exist that reference each `module` block. This will work as long as the module
+	// has some content. If a module is completely empty, then it will be detected as
+	// "not loaded".
+	blocks := modules.GetBlocks()
+	for _, block := range blocks {
+		if block.InModule() && block.ModuleBlock() != nil {
+			modulesUsed[block.ModuleBlock().ID()] = true
+		}
+
+		if block.Type() == "module" {
+			modulesByID[block.ID()] = block
+			_, ok := modulesUsed[block.ID()]
+			if !ok {
+				modulesUsed[block.ID()] = false
+			}
+		}
+	}
+
+	for id, v := range modulesUsed {
+		if !v {
+			block, ok := modulesByID[id]
+			if ok {
+				label := block.Type()
+				for _, l := range block.Labels() {
+					label += " " + fmt.Sprintf("%q", l)
+				}
+
+				diags = diags.Append(&hcl.Diagnostic{
+					Severity: hcl.DiagWarning,
+					Summary:  "Module not loaded, did you run `terraform init`? Or maybe the module is empty.",
+					Detail:   fmt.Sprintf("Module '%s' in file %q cannot be resolved. This module will be ignored.", label, block.HCLBlock().DefRange),
+					Subject:  &(block.HCLBlock().DefRange),
+				})
+			}
+		}
+	}
 
 	return diags
 }

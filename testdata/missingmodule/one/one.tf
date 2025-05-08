@@ -1,0 +1,3 @@
+module "onea" {
+  source = "./onea"
+}
