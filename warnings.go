@@ -55,7 +55,7 @@ func unresolvedModules(modules terraform.Modules) hcl.Diagnostics {
 
 				diags = diags.Append(&hcl.Diagnostic{
 					Severity: hcl.DiagWarning,
-					Summary:  "Module not loaded, did you run `terraform init`? Or maybe the module is empty.",
+					Summary:  "Module not loaded. Did you run `terraform init`?",
 					Detail:   fmt.Sprintf("Module '%s' in file %q cannot be resolved. This module will be ignored.", label, block.HCLBlock().DefRange),
 					Subject:  &(block.HCLBlock().DefRange),
 				})
