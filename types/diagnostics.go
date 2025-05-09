@@ -10,6 +10,28 @@ import (
 // Data is lost when doing a json marshal.
 type Diagnostics hcl.Diagnostics
 
+func (d *Diagnostics) UnmarshalJSON(data []byte) error {
+	cpy := make([]FriendlyDiagnostic, 0)
+	if err := json.Unmarshal(data, &cpy); err != nil {
+		return err
+	}
+
+	*d = make(Diagnostics, 0, len(cpy))
+	for _, diag := range cpy {
+		severity := hcl.DiagError
+		if diag.Severity == DiagnosticSeverityWarning {
+			severity = hcl.DiagWarning
+		}
+
+		*d = append(*d, &hcl.Diagnostic{
+			Severity: severity,
+			Summary:  diag.Summary,
+			Detail:   diag.Detail,
+		})
+	}
+	return nil
+}
+
 func (d Diagnostics) MarshalJSON() ([]byte, error) {
 	cpy := make([]FriendlyDiagnostic, 0, len(d))
 	for _, diag := range d {
