@@ -68,6 +68,8 @@ func main() {
 
 func TsMutations(ts *guts.Typescript) {
 	ts.ApplyMutations(
+		config.NotNullMaps,
+		config.EnumAsTypes,
 		// Enum list generator
 		config.EnumLists,
 		// Export all top level types
