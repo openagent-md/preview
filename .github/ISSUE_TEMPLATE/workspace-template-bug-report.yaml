@@ -1,0 +1,71 @@
+name: "Workspace Template Bug Report"
+description: "Workspace template yielded incorrect parameters."
+title: "param-bug: "
+labels: ["bug"]
+assignees:
+  - Emyrk
+body:
+  - type: textarea
+    id: issue
+    attributes:
+      label: "Describe the bug"
+      description: |
+        A clear and concise description of what the bug is. 
+        Was the parameter value/description/options/etc incorrect?
+        Did you encounter an error you did not expect? 
+        Did you expect to encounter an error, and did not?
+      placeholder: "A parameter that I expected is missing. The parameter is sourced from an external module."
+    validations:
+      required: true
+
+  - type: textarea
+    id: template
+    attributes:
+      label: "Offending Template"
+      description: |
+        Provide the most minimal workspace template that reproduces the bug. 
+        Try to remove any non-coder terraform blocks. 
+        Only `data "coder_parameter"` and `data "coder_workspace_tags"` 
+        with any supporting or referenced blocks are required.
+        
+        If the template is a single `main.tf`, please include the `main.tf` in the collapsible section below. 
+        If there are multiple files, either attach the files, or create a public github repository with the directory structure. 
+        Try to avoid attaching zips or tarballs.
+      value: |
+        <details>
+
+        <summary>Template `main.tf`</summary>
+
+        ```terraform
+        # Replace this with your `main.tf`
+        terraform {
+          required_providers {
+            coder = {
+              source = "coder/coder"
+              version = "2.3.0"
+            }
+          }
+        }
+        ```
+
+        </details>
+    validations:
+      required: true
+
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: "Screenshots"
+      description: |
+        If applicable, add screenshots to help explain your problem.
+    validations:
+      required: false
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: "Additional context"
+      description: |
+        Add any other context about the problem here.
+    validations:
+      required: false
