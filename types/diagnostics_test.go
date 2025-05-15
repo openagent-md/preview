@@ -10,18 +10,48 @@ import (
 	"github.com/coder/preview/types"
 )
 
-func TestDiagnosticsJSON(t *testing.T) {
+func TestDiagnosticExtra(t *testing.T) {
+	diag := &hcl.Diagnostic{
+		Severity: hcl.DiagWarning,
+		Summary:  "Some summary",
+		Detail:   "Some detail",
+	}
 
+	extra := types.ExtractDiagnosticExtra(diag)
+	require.Empty(t, extra.Code)
+
+	// Set it
+	extra.Code = "foobar"
+	types.SetDiagnosticExtra(diag, extra)
+
+	extra = types.ExtractDiagnosticExtra(diag)
+	require.Equal(t, "foobar", extra.Code)
+
+	// Set it again
+	extra.Code = "bazz"
+	types.SetDiagnosticExtra(diag, extra)
+
+	extra = types.ExtractDiagnosticExtra(diag)
+	require.Equal(t, "bazz", extra.Code)
+}
+
+func TestDiagnosticsJSON(t *testing.T) {
 	diags := types.Diagnostics{
 		{
 			Severity: hcl.DiagWarning,
 			Summary:  "Some summary",
 			Detail:   "Some detail",
+			Extra: types.DiagnosticExtra{
+				Code: "foobar",
+			},
 		},
 		{
 			Severity: hcl.DiagError,
 			Summary:  "Some summary",
 			Detail:   "Some detail",
+			Extra: types.DiagnosticExtra{
+				Code: "",
+			},
 		},
 	}
 
