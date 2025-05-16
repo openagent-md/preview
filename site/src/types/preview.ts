@@ -3,6 +3,8 @@
 // From types/diagnostics.go
 export interface DiagnosticExtra {
     readonly code: string;
+    // empty interface{} type, falling back to unknown
+    readonly Wrapped: unknown;
 }
 
 // From types/diagnostics.go
