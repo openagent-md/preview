@@ -370,13 +370,11 @@ func nullableString(block *terraform.Block, key string) *string {
 	if attr == nil || attr.IsNil() {
 		return nil
 	}
-	val := attr.Value()
-	if val.Type() != cty.String {
+
+	str, ok := hclext.AsString(attr.Value())
+	if !ok {
 		return nil
 	}
-
-	//nolint:gocritic // string type asserted
-	str := val.AsString()
 	return &str
 }
 
@@ -385,13 +383,9 @@ func optionalString(block *terraform.Block, key string) string {
 	if attr == nil || attr.IsNil() {
 		return ""
 	}
-	val := attr.Value()
-	if !val.Type().Equals(cty.String) {
-		return ""
-	}
 
-	//nolint:gocritic // string type asserted
-	return val.AsString()
+	str, _ := hclext.AsString(attr.Value())
+	return str
 }
 
 func required(block *terraform.Block, keys ...string) hcl.Diagnostics {
