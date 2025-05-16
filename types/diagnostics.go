@@ -10,13 +10,13 @@ type DiagnosticExtra struct {
 	Code string `json:"code"`
 
 	// If there was a previous extra, store it here for unwrapping.
-	wrapped any
+	Wrapped any
 }
 
 var _ hcl.DiagnosticExtraUnwrapper = DiagnosticExtra{}
 
 func (e DiagnosticExtra) UnwrapDiagnosticExtra() interface{} {
-	return e.wrapped
+	return e.Wrapped
 }
 
 func ExtractDiagnosticExtra(diag *hcl.Diagnostic) DiagnosticExtra {
@@ -29,16 +29,17 @@ func SetDiagnosticExtra(diag *hcl.Diagnostic, extra DiagnosticExtra) {
 	existing, ok := hcl.DiagnosticExtra[DiagnosticExtra](diag)
 	if ok {
 		// If an existing extra is present, we will keep the underlying
-		// wrapped. This is not perfect, as any parents are lost.
+		// Wrapped. This is not perfect, as any parents are lost.
 		// So try to avoid calling 'SetDiagnosticExtra' more than once.
-		extra.wrapped = existing.wrapped
+		// TODO: Fix this so we maintain the parents too. Maybe use a pointer?
+		extra.Wrapped = existing.Wrapped
 		diag.Extra = extra
 		return
 	}
 
 	// Maintain any existing extra fields.
 	if diag.Extra != nil {
-		extra.wrapped = diag.Extra
+		extra.Wrapped = diag.Extra
 	}
 	diag.Extra = extra
 }
