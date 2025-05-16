@@ -7,6 +7,8 @@ import (
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/hcl/v2/hclsyntax"
 	"github.com/zclconf/go-cty/cty"
+
+	"github.com/coder/preview/hclext"
 )
 
 const (
@@ -86,20 +88,9 @@ func NullString() HCLString {
 // calling this function.
 func (s HCLString) AsString() string {
 	if s.Valid() && s.Value.IsKnown() {
-		switch {
-		case s.Value.Type().Equals(cty.String):
-			//nolint:gocritic // string type asserted
-			return s.Value.AsString()
-		case s.Value.Type().Equals(cty.Number):
-			// TODO: Float vs Int?
-			return s.Value.AsBigFloat().String()
-		case s.Value.Type().Equals(cty.Bool):
-			if s.Value.True() {
-				return "true"
-			}
-			return "false"
-		default:
-			// ?? What to do?
+		str, ok := hclext.AsString(s.Value)
+		if ok {
+			return str
 		}
 	}
 
