@@ -198,14 +198,9 @@ func ParameterUsageDiagnostics(p types.Parameter) hcl.Diagnostics {
 }
 
 func ParameterValidationFromBlock(block *terraform.Block) (types.ParameterValidation, hcl.Diagnostics) {
-	diags := required(block, "error")
+	diags := required(block)
 	if diags.HasErrors() {
 		return types.ParameterValidation{}, diags
-	}
-
-	pErr, errDiag := requiredString(block, "error")
-	if errDiag != nil {
-		diags = diags.Append(errDiag)
 	}
 
 	if diags.HasErrors() {
@@ -214,7 +209,7 @@ func ParameterValidationFromBlock(block *terraform.Block) (types.ParameterValida
 
 	p := types.ParameterValidation{
 		Regex:     nullableString(block, "regex"),
-		Error:     pErr,
+		Error:     optionalString(block, "error"),
 		Min:       nullableInteger(block, "min"),
 		Max:       nullableInteger(block, "max"),
 		Monotonic: nullableString(block, "monotonic"),
