@@ -48,6 +48,26 @@ func SetDiagnosticExtra(diag *hcl.Diagnostic, extra DiagnosticExtra) {
 // Data is lost when doing a json marshal.
 type Diagnostics hcl.Diagnostics
 
+func (d Diagnostics) FriendlyDiagnostics() []FriendlyDiagnostic {
+	cpy := make([]FriendlyDiagnostic, 0, len(d))
+	for _, diag := range d {
+		severity := DiagnosticSeverityError
+		if diag.Severity == hcl.DiagWarning {
+			severity = DiagnosticSeverityWarning
+		}
+
+		extra := ExtractDiagnosticExtra(diag)
+
+		cpy = append(cpy, FriendlyDiagnostic{
+			Severity: severity,
+			Summary:  diag.Summary,
+			Detail:   diag.Detail,
+			Extra:    extra,
+		})
+	}
+	return cpy
+}
+
 func (d *Diagnostics) UnmarshalJSON(data []byte) error {
 	cpy := make([]FriendlyDiagnostic, 0)
 	if err := json.Unmarshal(data, &cpy); err != nil {
@@ -75,23 +95,7 @@ func (d *Diagnostics) UnmarshalJSON(data []byte) error {
 }
 
 func (d Diagnostics) MarshalJSON() ([]byte, error) {
-	cpy := make([]FriendlyDiagnostic, 0, len(d))
-	for _, diag := range d {
-		severity := DiagnosticSeverityError
-		if diag.Severity == hcl.DiagWarning {
-			severity = DiagnosticSeverityWarning
-		}
-
-		extra := ExtractDiagnosticExtra(diag)
-
-		cpy = append(cpy, FriendlyDiagnostic{
-			Severity: severity,
-			Summary:  diag.Summary,
-			Detail:   diag.Detail,
-			Extra:    extra,
-		})
-	}
-	return json.Marshal(cpy)
+	return json.Marshal(d.FriendlyDiagnostics())
 }
 
 type DiagnosticSeverityString string
