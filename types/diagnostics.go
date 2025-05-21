@@ -6,6 +6,12 @@ import (
 	"github.com/hashicorp/hcl/v2"
 )
 
+const (
+	// DiagnosticCodeRequired is used when a parameter value is `null`, but
+	// the parameter is required.
+	DiagnosticCodeRequired = "required"
+)
+
 type DiagnosticExtra struct {
 	Code string `json:"code"`
 
@@ -17,6 +23,13 @@ var _ hcl.DiagnosticExtraUnwrapper = DiagnosticExtra{}
 
 func (e DiagnosticExtra) UnwrapDiagnosticExtra() interface{} {
 	return e.Wrapped
+}
+
+func DiagnosticCode(diag *hcl.Diagnostic, code string) *hcl.Diagnostic {
+	SetDiagnosticExtra(diag, DiagnosticExtra{
+		Code: code,
+	})
+	return diag
 }
 
 func ExtractDiagnosticExtra(diag *hcl.Diagnostic) DiagnosticExtra {

@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"slices"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/hcl/v2"
@@ -144,7 +145,8 @@ func Test_Extract(t *testing.T) {
 			unknownTags: []string{},
 			input:       preview.Input{},
 			params: map[string]assertParam{
-				"os": ap().
+				"os": apWithDiags().
+					errorDiagnostics("unique").
 					value("0000000000000000000000000000000000000000000000000000000000000000"),
 			},
 		},
@@ -222,7 +224,18 @@ func Test_Extract(t *testing.T) {
 			input:       preview.Input{},
 			unknownTags: []string{},
 			params: map[string]assertParam{
-				"word": ap(),
+				"word": apWithDiags().
+					errorDiagnostics("Required"),
+			},
+		},
+		{
+			name:        "required",
+			dir:         "required",
+			expTags:     map[string]string{},
+			input:       preview.Input{},
+			unknownTags: []string{},
+			params: map[string]assertParam{
+				"region": apWithDiags().errorDiagnostics("Required"),
 			},
 		},
 		{
@@ -487,7 +500,51 @@ func Test_Extract(t *testing.T) {
 type assertParam func(t *testing.T, parameter types.Parameter)
 
 func ap() assertParam {
+	return func(t *testing.T, parameter types.Parameter) {
+		t.Helper()
+		assert.Empty(t, parameter.Diagnostics, "parameter should have no diagnostics")
+	}
+}
+
+func apWithDiags() assertParam {
 	return func(t *testing.T, parameter types.Parameter) {}
+}
+
+func (a assertParam) errorDiagnostics(patterns ...string) assertParam {
+	return a.diagnostics(hcl.DiagError, patterns...)
+}
+
+func (a assertParam) warnDiagnostics(patterns ...string) assertParam {
+	return a.diagnostics(hcl.DiagWarning, patterns...)
+}
+
+func (a assertParam) diagnostics(sev hcl.DiagnosticSeverity, patterns ...string) assertParam {
+	shadow := patterns
+	return a.extend(func(t *testing.T, parameter types.Parameter) {
+		checks := make([]string, len(shadow))
+		copy(checks, shadow)
+
+	DiagLoop:
+		for _, diag := range parameter.Diagnostics {
+			if diag.Severity != sev {
+				continue
+			}
+			for i, pat := range checks {
+				if strings.Contains(diag.Summary, pat) || strings.Contains(diag.Detail, pat) {
+					checks = append(checks[:i], checks[i+1:]...)
+					break DiagLoop
+				}
+			}
+		}
+
+		assert.Equal(t, []string{}, checks, "missing expected diagnostic errors")
+	})
+}
+
+func (a assertParam) noDiagnostics() assertParam {
+	return a.extend(func(t *testing.T, parameter types.Parameter) {
+		assert.Empty(t, parameter.Diagnostics, "parameter should have no diagnostics")
+	})
 }
 
 func (a assertParam) formType(exp provider.ParameterFormType) assertParam {
@@ -555,6 +612,7 @@ func (a assertParam) extend(f assertParam) assertParam {
 	}
 
 	return func(t *testing.T, parameter types.Parameter) {
+		t.Helper()
 		(a)(t, parameter)
 		f(t, parameter)
 	}
