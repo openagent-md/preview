@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/hcl/v2"
 )
 
-func parameterDiagnostics(modules terraform.Modules) hcl.Diagnostics {
+func warnings(modules terraform.Modules) hcl.Diagnostics {
 	var diags hcl.Diagnostics
 	diags = diags.Extend(unexpandedCountBlocks(modules))
 	diags = diags.Extend(unresolvedModules(modules))
