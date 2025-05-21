@@ -134,8 +134,8 @@ func Preview(ctx context.Context, input Input, dir fs.FS) (output *Output, diagn
 	rp, rpDiags := parameters(modules)
 	tags, tagDiags := workspaceTags(modules, p.Files())
 
-	// Add warnings
-	diags = diags.Extend(warnings(modules))
+	// Add parameterDiagnostics
+	diags = diags.Extend(parameterDiagnostics(modules))
 
 	return &Output{
 		ModuleOutput:  outputs,
