@@ -11,7 +11,7 @@ clean-testdata:
 
 .PHONY: build-wasm
 build-wasm: site/public/build/preview.wasm
-	mkdir -p ./site/public/build/
+	mkdir -p ./build
 
 site/public/build/preview.wasm: $(GO_SRC_FILES)
-	GOOS=js GOARCH=wasm go build -o site/public/build/preview.wasm ./cmd/wasm
+	GOOS=js GOARCH=wasm go build -o ./build/preview.wasm ./cmd/wasm
