@@ -23,5 +23,5 @@ dist-ssr
 *.sln
 *.sw?
 
-# wasm
-public/build/preview.wasm
+# build artifacts
+public/build/

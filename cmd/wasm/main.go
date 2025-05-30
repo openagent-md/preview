@@ -18,7 +18,7 @@ import (
 
 func main() {
 	// Create a channel to keep the Go program alive
-	done := make(chan struct{}, 0)
+	done := make(chan struct{})
 
 	// Expose the Go function `fibonacciSum` to JavaScript
 	js.Global().Set("go_preview", js.FuncOf(tfpreview))
