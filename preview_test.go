@@ -77,13 +77,25 @@ func Test_Extract(t *testing.T) {
 			},
 		},
 		{
+			name: "chain-no-inputs",
+			dir:  "chain",
+			input: preview.Input{
+				ParameterValues: map[string]string{},
+			},
+			expTags:     map[string]string{},
+			unknownTags: []string{},
+			params: map[string]assertParam{
+				"git_repo": apWithDiags().errorDiagnostics("Required"),
+			},
+		},
+		{
 			name: "chain-inputs",
 			dir:  "chain",
 			input: preview.Input{
 				ParameterValues: map[string]string{
-					//"git_repo":     "coder/coder",
-					//"ide_selector": `["goland"]`,
-					//"cpu_cores":    "4",
+					"git_repo":     "coder/coder",
+					"ide_selector": `["goland"]`,
+					"cpu_cores":    "4",
 				},
 			},
 			expTags:     map[string]string{},
