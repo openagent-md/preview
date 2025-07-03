@@ -77,6 +77,27 @@ func Test_Extract(t *testing.T) {
 			},
 		},
 		{
+			name: "chain-inputs",
+			dir:  "chain",
+			input: preview.Input{
+				ParameterValues: map[string]string{
+					//"git_repo":     "coder/coder",
+					//"ide_selector": `["goland"]`,
+					//"cpu_cores":    "4",
+				},
+			},
+			expTags:     map[string]string{},
+			unknownTags: []string{},
+			params: map[string]assertParam{
+				"git_repo": ap().
+					value("coder/coder"),
+				"ide_selector": ap().
+					value(`["GoLand"]`),
+				"cpu_cores": ap().valueType(provider.OptionTypeNumber).
+					value("4"),
+			},
+		},
+		{
 			name:        "conditional-no-inputs",
 			dir:         "conditional",
 			expTags:     map[string]string{},
@@ -594,6 +615,12 @@ func (a assertParam) diagnostics(sev hcl.DiagnosticSeverity, patterns ...string)
 func (a assertParam) noDiagnostics() assertParam {
 	return a.extend(func(t *testing.T, parameter types.Parameter) {
 		assert.Empty(t, parameter.Diagnostics, "parameter should have no diagnostics")
+	})
+}
+
+func (a assertParam) valueType(exp provider.OptionType) assertParam {
+	return a.extend(func(t *testing.T, parameter types.Parameter) {
+		assert.Equal(t, exp, parameter.Type, "parameter value type equality check")
 	})
 }
 
