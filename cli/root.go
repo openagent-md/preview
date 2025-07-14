@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"slices"
 	"strings"
 
 	"github.com/hashicorp/hcl/v2"
@@ -27,6 +28,7 @@ func (r *RootCmd) Root() *serpent.Command {
 		vars     []string
 		groups   []string
 		planJSON string
+		preset   string
 	)
 	cmd := &serpent.Command{
 		Use:   "codertf",
@@ -64,9 +66,25 @@ func (r *RootCmd) Root() *serpent.Command {
 				Default:       "",
 				Value:         serpent.StringArrayOf(&groups),
 			},
+			{
+				Name:          "preset",
+				Description:   "Name of the preset to define parameters. Run preview without this flag first to see a list of presets.",
+				Flag:          "preset",
+				FlagShorthand: "s",
+				Default:       "",
+				Value:         serpent.StringOf(&preset),
+			},
 		},
 		Handler: func(i *serpent.Invocation) error {
 			dfs := os.DirFS(dir)
+
+			ctx := i.Context()
+
+			output, _ := preview.Preview(ctx, preview.Input{}, dfs)
+			presets := output.Presets
+			chosenPresetIndex := slices.IndexFunc(presets, func(p types.Preset) bool {
+				return p.Name == preset
+			})
 
 			rvars := make(map[string]string)
 			for _, val := range vars {
@@ -75,6 +93,11 @@ func (r *RootCmd) Root() *serpent.Command {
 					continue
 				}
 				rvars[parts[0]] = parts[1]
+			}
+			if chosenPresetIndex != -1 {
+				for paramName, paramValue := range presets[chosenPresetIndex].Parameters {
+					rvars[paramName] = paramValue
+				}
 			}
 
 			input := preview.Input{
@@ -85,7 +108,6 @@ func (r *RootCmd) Root() *serpent.Command {
 				},
 			}
 
-			ctx := i.Context()
 			output, diags := preview.Preview(ctx, input, dfs)
 			if output == nil {
 				return diags
@@ -101,6 +123,10 @@ func (r *RootCmd) Root() *serpent.Command {
 			if len(diags) > 0 {
 				_, _ = fmt.Fprintf(os.Stderr, "Workspace Tags Diagnostics:\n")
 				clidisplay.WriteDiagnostics(os.Stderr, output.Files, diags)
+			}
+
+			if chosenPresetIndex == -1 {
+				clidisplay.Presets(os.Stdout, presets, output.Files)
 			}
 
 			clidisplay.Parameters(os.Stdout, output.Parameters, output.Files)

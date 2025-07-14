@@ -43,6 +43,7 @@ func Test_Extract(t *testing.T) {
 		expTags     map[string]string
 		unknownTags []string
 		params      map[string]assertParam
+		presets     func(t *testing.T, presets []types.Preset)
 		warnings    []*regexp.Regexp
 	}{
 		{
@@ -241,6 +242,62 @@ func Test_Extract(t *testing.T) {
 			params: map[string]assertParam{
 				"word": apWithDiags().
 					errorDiagnostics("Required"),
+			},
+		},
+		{
+			name:        "invalid presets",
+			dir:         "invalidpresets",
+			expTags:     map[string]string{},
+			input:       preview.Input{},
+			unknownTags: []string{},
+			params: map[string]assertParam{
+				"valid_parameter_name": ap().
+					optVals("valid_option_value"),
+			},
+			presets: func(t *testing.T, presets []types.Preset) {
+				presetMap := map[string]func(t *testing.T, preset types.Preset){
+					"empty_parameters": func(t *testing.T, preset types.Preset) {
+						require.Len(t, preset.Diagnostics, 0)
+					},
+					"no_parameters": func(t *testing.T, preset types.Preset) {
+						require.Len(t, preset.Diagnostics, 0)
+					},
+					"invalid_parameter_name": func(t *testing.T, preset types.Preset) {
+						require.Len(t, preset.Diagnostics, 1)
+						require.Equal(t, preset.Diagnostics[0].Summary, "Undefined Parameter")
+						require.Equal(t, preset.Diagnostics[0].Detail, "Preset parameter \"invalid_parameter_name\" is not defined by the template.")
+					},
+					"invalid_parameter_value": func(t *testing.T, preset types.Preset) {
+						require.Len(t, preset.Diagnostics, 1)
+						require.Equal(t, preset.Diagnostics[0].Summary, "Value must be a valid option")
+						require.Equal(t, preset.Diagnostics[0].Detail, "the value \"invalid_value\" must be defined as one of options")
+					},
+					"valid_preset": func(t *testing.T, preset types.Preset) {
+						require.Len(t, preset.Diagnostics, 0)
+						require.Equal(t, preset.Parameters, map[string]string{
+							"valid_parameter_name": "valid_option_value",
+						})
+					},
+				}
+
+				for _, preset := range presets {
+					if fn, ok := presetMap[preset.Name]; ok {
+						fn(t, preset)
+					}
+				}
+
+				var defaultPresetsWithError int
+				for _, preset := range presets {
+					if preset.Name == "default_preset" || preset.Name == "another_default_preset" {
+						for _, diag := range preset.Diagnostics {
+							if diag.Summary == "Multiple default presets" {
+								defaultPresetsWithError++
+								break
+							}
+						}
+					}
+				}
+				require.Equal(t, 1, defaultPresetsWithError, "exactly one default preset should have the multiple defaults error")
 			},
 		},
 		{
@@ -574,6 +631,11 @@ func Test_Extract(t *testing.T) {
 				check, ok := tc.params[param.Name]
 				require.True(t, ok, "unknown parameter %s", param.Name)
 				check(t, param)
+			}
+
+			// Assert presets
+			if tc.presets != nil {
+				tc.presets(t, output.Presets)
 			}
 		})
 	}
