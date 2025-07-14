@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"io/fs"
 	"log/slog"
-	"path/filepath"
 
 	"github.com/aquasecurity/trivy/pkg/iac/scanners/terraform/parser"
 	"github.com/hashicorp/hcl/v2"
@@ -14,6 +13,7 @@ import (
 	ctyjson "github.com/zclconf/go-cty/cty/json"
 
 	"github.com/coder/preview/hclext"
+	"github.com/coder/preview/tfvars"
 	"github.com/coder/preview/types"
 )
 
@@ -26,6 +26,9 @@ type Input struct {
 	ParameterValues map[string]string
 	Owner           types.WorkspaceOwner
 	Logger          *slog.Logger
+	// TFVars will override any variables set in '.tfvars' files.
+	// The value set must be a cty.Value, as the type can be anything.
+	TFVars map[string]cty.Value
 }
 
 type Output struct {
@@ -80,17 +83,23 @@ func Preview(ctx context.Context, input Input, dir fs.FS) (output *Output, diagn
 		}
 	}()
 
-	// TODO: Fix logging. There is no way to pass in an instanced logger to
-	//   the parser.
-	// slog.SetLogLoggerLevel(slog.LevelDebug)
-	// slog.SetDefault(slog.New(log.NewHandler(os.Stderr, nil)))
-
-	varFiles, err := tfVarFiles("", dir)
+	varFiles, err := tfvars.TFVarFiles("", dir)
 	if err != nil {
 		return nil, hcl.Diagnostics{
 			{
 				Severity: hcl.DiagError,
 				Summary:  "Files not found",
+				Detail:   err.Error(),
+			},
+		}
+	}
+
+	variableValues, err := tfvars.LoadTFVars(dir, varFiles)
+	if err != nil {
+		return nil, hcl.Diagnostics{
+			{
+				Severity: hcl.DiagError,
+				Summary:  "Failed to load tfvars from files",
 				Detail:   err.Error(),
 			},
 		}
@@ -123,17 +132,24 @@ func Preview(ctx context.Context, input Input, dir fs.FS) (output *Output, diagn
 		logger = slog.New(slog.DiscardHandler)
 	}
 
+	// Override with user-supplied variables
+	for k, v := range input.TFVars {
+		variableValues[k] = v
+	}
+
 	// moduleSource is "" for a local module
 	p := parser.New(dir, "",
 		parser.OptionWithLogger(logger),
 		parser.OptionStopOnHCLError(false),
 		parser.OptionWithDownloads(false),
 		parser.OptionWithSkipCachedModules(true),
-		parser.OptionWithTFVarsPaths(varFiles...),
 		parser.OptionWithEvalHook(planHook),
 		parser.OptionWithEvalHook(ownerHook),
 		parser.OptionWithWorkingDirectoryPath("/"),
 		parser.OptionWithEvalHook(parameterContextsEvalHook(input)),
+		// 'OptionsWithTfVars' cannot be set with 'OptionWithTFVarsPaths'. So load the
+		// tfvars from the files ourselves and merge with the user-supplied tf vars.
+		parser.OptionsWithTfVars(variableValues),
 	)
 
 	err = p.ParseFS(ctx, ".")
@@ -178,34 +194,4 @@ func Preview(ctx context.Context, input Input, dir fs.FS) (output *Output, diagn
 func (i Input) RichParameterValue(key string) (string, bool) {
 	p, ok := i.ParameterValues[key]
 	return p, ok
-}
-
-// tfVarFiles extracts any .tfvars files from the given directory.
-// TODO: Test nested directories and how that should behave.
-func tfVarFiles(path string, dir fs.FS) ([]string, error) {
-	dp := "."
-	entries, err := fs.ReadDir(dir, dp)
-	if err != nil {
-		return nil, fmt.Errorf("read dir %q: %w", dp, err)
-	}
-
-	files := make([]string, 0)
-	for _, entry := range entries {
-		if entry.IsDir() {
-			subD, err := fs.Sub(dir, entry.Name())
-			if err != nil {
-				return nil, fmt.Errorf("sub dir %q: %w", entry.Name(), err)
-			}
-			newFiles, err := tfVarFiles(filepath.Join(path, entry.Name()), subD)
-			if err != nil {
-				return nil, err
-			}
-			files = append(files, newFiles...)
-		}
-
-		if filepath.Ext(entry.Name()) == ".tfvars" {
-			files = append(files, filepath.Join(path, entry.Name()))
-		}
-	}
-	return files, nil
 }
