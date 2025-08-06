@@ -80,8 +80,15 @@ func planJSONHook(dfs fs.FS, input Input) (func(ctx *tfcontext.Context, blocks t
 
 // priorPlanModule returns the state data of the module a given block is in.
 func priorPlanModule(plan *tfjson.Plan, block *terraform.Block) *tfjson.StateModule {
+	if plan.PriorState == nil || plan.PriorState.Values == nil {
+		return nil // No root module available in the plan, nothing to do
+	}
+
+	rootModule := plan.PriorState.Values.RootModule
+
 	if !block.InModule() {
-		return plan.PriorState.Values.RootModule
+		// If the block is not in a module, then we can just return the root module.
+		return rootModule
 	}
 
 	var modPath []string
@@ -94,9 +101,12 @@ func priorPlanModule(plan *tfjson.Plan, block *terraform.Block) *tfjson.StateMod
 		}
 	}
 
-	current := plan.PriorState.Values.RootModule
+	current := rootModule
 	for i := range modPath {
 		idx := slices.IndexFunc(current.ChildModules, func(m *tfjson.StateModule) bool {
+			if m == nil {
+				return false
+			}
 			return m.Address == strings.Join(modPath[:i+1], ".")
 		})
 		if idx == -1 {
