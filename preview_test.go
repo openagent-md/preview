@@ -16,6 +16,7 @@ import (
 	"github.com/zclconf/go-cty/cty"
 
 	"github.com/coder/preview"
+	"github.com/coder/preview/hclext"
 	"github.com/coder/preview/types"
 	"github.com/coder/terraform-provider-coder/v2/provider"
 )
@@ -43,6 +44,7 @@ func Test_Extract(t *testing.T) {
 		expTags     map[string]string
 		unknownTags []string
 		params      map[string]assertParam
+		variables   map[string]assertVariable
 		presets     func(t *testing.T, presets []types.Preset)
 		warnings    []*regexp.Regexp
 	}{
@@ -76,6 +78,18 @@ func Test_Extract(t *testing.T) {
 					optVals("us", "eu").
 					formType(provider.ParameterFormTypeRadio),
 				"numerical": ap().value("5"),
+			},
+			variables: map[string]assertVariable{
+				"string": av().def(cty.StringVal("Hello, world!")).typeEq(cty.String).
+					description("test").nullable(true).sensitive(true),
+				"number":        av().def(cty.NumberIntVal(7)).typeEq(cty.Number),
+				"boolean":       av().def(cty.BoolVal(true)).typeEq(cty.Bool),
+				"coerce_string": av().def(cty.StringVal("5")).typeEq(cty.String),
+				"complex": av().typeEq(cty.Object(map[string]cty.Type{
+					"list": cty.List(cty.String),
+					"name": cty.String,
+					"age":  cty.Number,
+				})),
 			},
 		},
 		{
@@ -149,6 +163,11 @@ func Test_Extract(t *testing.T) {
 				"indexed_0": ap(),
 				"indexed_1": ap(),
 			},
+			variables: map[string]assertVariable{
+				"regions": av().def(cty.SetVal([]cty.Value{
+					cty.StringVal("us"), cty.StringVal("eu"), cty.StringVal("au"),
+				})).typeEq(cty.Set(cty.String)),
+			},
 		},
 		{
 			name: "external docker resource without plan data",
@@ -221,6 +240,9 @@ func Test_Extract(t *testing.T) {
 					optExists("t3a.large").
 					def("m7gd.8xlarge").
 					value("m7gd.8xlarge"),
+			},
+			variables: map[string]assertVariable{
+				"regions": av().typeEq(cty.List(cty.String)),
 			},
 		},
 		{
@@ -434,6 +456,9 @@ func Test_Extract(t *testing.T) {
 				"team":           ap().optVals("frontend", "backend", "fullstack"),
 				"jetbrains_ide":  ap(),
 			},
+			variables: map[string]assertVariable{
+				"security": av().def(cty.StringVal("high")).typeEq(cty.String),
+			},
 		},
 		{
 			name:    "count",
@@ -528,6 +553,17 @@ func Test_Extract(t *testing.T) {
 					optVals("GO", "IU", "PY").
 					optNames("GoLand 2024.3", "IntelliJ IDEA Ultimate 2024.3", "PyCharm Professional 2024.3"),
 			},
+			variables: map[string]assertVariable{
+				"jetbrains_ides":     av().typeEq(cty.List(cty.String)).description("The list of IDE product codes."),
+				"releases_base_link": av(),
+				"channel":            av(),
+				"download_base_link": av(),
+				"arch":               av(),
+				"jetbrains_ide_versions": av().typeEq(cty.Map(cty.Object(map[string]cty.Type{
+					"build_number": cty.String,
+					"version":      cty.String,
+				}))),
+			},
 		},
 		{
 			name:    "tfvars_from_file",
@@ -540,6 +576,12 @@ func Test_Extract(t *testing.T) {
 			params: map[string]assertParam{
 				"variable_values": ap().
 					def("alex").optVals("alex", "bob", "claire", "jason"),
+			},
+			variables: map[string]assertVariable{
+				"one":   av(),
+				"two":   av(),
+				"three": av(),
+				"four":  av(),
 			},
 		},
 		{
@@ -559,6 +601,12 @@ func Test_Extract(t *testing.T) {
 				"variable_values": ap().
 					def("andrew").optVals("andrew", "bill", "carter", "jason"),
 			},
+			variables: map[string]assertVariable{
+				"one":   av(),
+				"two":   av(),
+				"three": av(),
+				"four":  av(),
+			},
 		},
 		{
 			name:        "unknownoption",
@@ -569,6 +617,9 @@ func Test_Extract(t *testing.T) {
 			params: map[string]assertParam{
 				"unknown": apWithDiags().
 					errorDiagnostics("The set of options cannot be resolved"),
+			},
+			variables: map[string]assertVariable{
+				"unknown": av().def(cty.NilVal),
 			},
 		},
 	} {
@@ -637,8 +688,78 @@ func Test_Extract(t *testing.T) {
 			if tc.presets != nil {
 				tc.presets(t, output.Presets)
 			}
+
+			// Assert variables
+			require.Len(t, output.Variables, len(tc.variables), "wrong number of variables expected")
+			for _, variable := range output.Variables {
+				check, ok := tc.variables[variable.Name]
+				require.True(t, ok, "unknown variable %s", variable.Name)
+				check(t, variable)
+			}
 		})
 	}
+}
+
+type assertVariable func(t *testing.T, variable types.Variable)
+
+func av() assertVariable {
+	return func(t *testing.T, v types.Variable) {
+		t.Helper()
+		assert.Empty(t, v.Diagnostics, "variable should have no diagnostics")
+	}
+}
+
+func avWithDiags() assertVariable {
+	return func(t *testing.T, parameter types.Variable) {}
+}
+
+func (a assertVariable) errorDiagnostics(patterns ...string) assertVariable {
+	return a.diagnostics(hcl.DiagError, patterns...)
+}
+
+func (a assertVariable) warnDiagnostics(patterns ...string) assertVariable {
+	return a.diagnostics(hcl.DiagWarning, patterns...)
+}
+
+func (a assertVariable) diagnostics(sev hcl.DiagnosticSeverity, patterns ...string) assertVariable {
+	shadow := patterns
+	return a.extend(func(t *testing.T, v types.Variable) {
+		assertDiags(t, sev, v.Diagnostics, shadow...)
+	})
+}
+
+func (a assertVariable) nullable(n bool) assertVariable {
+	return a.extend(func(t *testing.T, v types.Variable) {
+		assert.Equal(t, v.Nullable, n, "variable nullable check")
+	})
+}
+
+func (a assertVariable) typeEq(ty cty.Type) assertVariable {
+	return a.extend(func(t *testing.T, v types.Variable) {
+		assert.Truef(t, ty.Equals(v.Type), "%q variable type equality check", v.Name)
+	})
+}
+
+func (a assertVariable) def(def cty.Value) assertVariable {
+	return a.extend(func(t *testing.T, v types.Variable) {
+		if !assert.Truef(t, def.Equals(v.Default).True(), "%q variable default equality check", v.Name) {
+			exp, _ := hclext.AsString(def)
+			got, _ := hclext.AsString(v.Default)
+			t.Logf("Expected: %s, Value: %s", exp, got)
+		}
+	})
+}
+
+func (a assertVariable) sensitive(s bool) assertVariable {
+	return a.extend(func(t *testing.T, v types.Variable) {
+		assert.Equal(t, v.Sensitive, s, "variable sensitive check")
+	})
+}
+
+func (a assertVariable) description(d string) assertVariable {
+	return a.extend(func(t *testing.T, v types.Variable) {
+		assert.Equal(t, v.Description, d, "variable description check")
+	})
 }
 
 type assertParam func(t *testing.T, parameter types.Parameter)
@@ -665,23 +786,7 @@ func (a assertParam) warnDiagnostics(patterns ...string) assertParam {
 func (a assertParam) diagnostics(sev hcl.DiagnosticSeverity, patterns ...string) assertParam {
 	shadow := patterns
 	return a.extend(func(t *testing.T, parameter types.Parameter) {
-		checks := make([]string, len(shadow))
-		copy(checks, shadow)
-
-	DiagLoop:
-		for _, diag := range parameter.Diagnostics {
-			if diag.Severity != sev {
-				continue
-			}
-			for i, pat := range checks {
-				if strings.Contains(diag.Summary, pat) || strings.Contains(diag.Detail, pat) {
-					checks = append(checks[:i], checks[i+1:]...)
-					break DiagLoop
-				}
-			}
-		}
-
-		assert.Equal(t, []string{}, checks, "missing expected diagnostic errors")
+		assertDiags(t, sev, parameter.Diagnostics, shadow...)
 	})
 }
 
@@ -770,4 +875,38 @@ func (a assertParam) extend(f assertParam) assertParam {
 		(a)(t, parameter)
 		f(t, parameter)
 	}
+}
+
+//nolint:revive
+func (a assertVariable) extend(f assertVariable) assertVariable {
+	if a == nil {
+		a = func(t *testing.T, v types.Variable) {}
+	}
+
+	return func(t *testing.T, v types.Variable) {
+		t.Helper()
+		(a)(t, v)
+		f(t, v)
+	}
+}
+
+func assertDiags(t *testing.T, sev hcl.DiagnosticSeverity, diags types.Diagnostics, patterns ...string) {
+	t.Helper()
+	checks := make([]string, len(patterns))
+	copy(checks, patterns)
+
+DiagLoop:
+	for _, diag := range diags {
+		if diag.Severity != sev {
+			continue
+		}
+		for i, pat := range checks {
+			if strings.Contains(diag.Summary, pat) || strings.Contains(diag.Detail, pat) {
+				checks = append(checks[:i], checks[i+1:]...)
+				break DiagLoop
+			}
+		}
+	}
+
+	assert.Equal(t, []string{}, checks, "missing expected diagnostic errors")
 }

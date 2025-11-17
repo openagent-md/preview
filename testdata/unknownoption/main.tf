@@ -13,6 +13,10 @@ terraform {
   }
 }
 
+variable "unknown" {
+  default = null
+}
+
 data "coder_parameter" "unknown" {
   name = "unknown"
   display_name = "Unknown Option Example"
