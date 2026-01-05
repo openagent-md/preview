@@ -41,12 +41,13 @@ func Test_Extract(t *testing.T) {
 		failPreview bool
 		input       preview.Input
 
-		expTags     map[string]string
-		unknownTags []string
-		params      map[string]assertParam
-		variables   map[string]assertVariable
-		presets     func(t *testing.T, presets []types.Preset)
-		warnings    []*regexp.Regexp
+		expTags      map[string]string
+		unknownTags  []string
+		params       map[string]assertParam
+		variables    map[string]assertVariable
+		presetsFuncs func(t *testing.T, presets []types.Preset)
+		presets      map[string]assertPreset
+		warnings     []*regexp.Regexp
 	}{
 		{
 			name:        "bad param values",
@@ -267,6 +268,27 @@ func Test_Extract(t *testing.T) {
 			},
 		},
 		{
+			name:        "valid prebuild",
+			dir:         "preset",
+			expTags:     map[string]string{},
+			input:       preview.Input{},
+			unknownTags: []string{},
+			params: map[string]assertParam{
+				"number":      ap(),
+				"has_default": ap(),
+			},
+			presets: map[string]assertPreset{
+				"valid_preset": aPre().
+					value("number", "9").
+					value("has_default", "changed").
+					prebuildCount(3),
+				"prebuild_instance_zero": aPre().
+					prebuildCount(0),
+				"not_prebuild": aPre().
+					prebuildCount(0),
+			},
+		},
+		{
 			name:        "invalid presets",
 			dir:         "invalidpresets",
 			expTags:     map[string]string{},
@@ -276,50 +298,14 @@ func Test_Extract(t *testing.T) {
 				"valid_parameter_name": ap().
 					optVals("valid_option_value"),
 			},
-			presets: func(t *testing.T, presets []types.Preset) {
-				presetMap := map[string]func(t *testing.T, preset types.Preset){
-					"empty_parameters": func(t *testing.T, preset types.Preset) {
-						require.Len(t, preset.Diagnostics, 0)
-					},
-					"no_parameters": func(t *testing.T, preset types.Preset) {
-						require.Len(t, preset.Diagnostics, 0)
-					},
-					"invalid_parameter_name": func(t *testing.T, preset types.Preset) {
-						require.Len(t, preset.Diagnostics, 1)
-						require.Equal(t, preset.Diagnostics[0].Summary, "Undefined Parameter")
-						require.Equal(t, preset.Diagnostics[0].Detail, "Preset parameter \"invalid_parameter_name\" is not defined by the template.")
-					},
-					"invalid_parameter_value": func(t *testing.T, preset types.Preset) {
-						require.Len(t, preset.Diagnostics, 1)
-						require.Equal(t, preset.Diagnostics[0].Summary, "Value must be a valid option")
-						require.Equal(t, preset.Diagnostics[0].Detail, "the value \"invalid_value\" must be defined as one of options")
-					},
-					"valid_preset": func(t *testing.T, preset types.Preset) {
-						require.Len(t, preset.Diagnostics, 0)
-						require.Equal(t, preset.Parameters, map[string]string{
-							"valid_parameter_name": "valid_option_value",
-						})
-					},
-				}
-
-				for _, preset := range presets {
-					if fn, ok := presetMap[preset.Name]; ok {
-						fn(t, preset)
-					}
-				}
-
-				var defaultPresetsWithError int
-				for _, preset := range presets {
-					if preset.Name == "default_preset" || preset.Name == "another_default_preset" {
-						for _, diag := range preset.Diagnostics {
-							if diag.Summary == "Multiple default presets" {
-								defaultPresetsWithError++
-								break
-							}
-						}
-					}
-				}
-				require.Equal(t, 1, defaultPresetsWithError, "exactly one default preset should have the multiple defaults error")
+			presets: map[string]assertPreset{
+				"empty_parameters":        aPre(),
+				"no_parameters":           aPre(),
+				"invalid_parameter_name":  aPreWithDiags().errorDiagnostics("Preset parameter \"invalid_parameter_name\" is not defined by the template."),
+				"invalid_parameter_value": aPreWithDiags().errorDiagnostics("the value \"invalid_value\" must be defined as one of options"),
+				"valid_preset":            aPre().value("valid_parameter_name", "valid_option_value"),
+				"another_default_preset":  aPre().def(true),
+				"default_preset":          aPreWithDiags().errorDiagnostics("Only one preset can be marked as default. \"another_default_preset\" is already marked as default"),
 			},
 		},
 		{
@@ -649,6 +635,9 @@ func Test_Extract(t *testing.T) {
 			}
 			require.False(t, diags.HasErrors())
 
+			// Validate prebuilds too
+			preview.ValidatePrebuilds(context.Background(), tc.input, output.Presets, dirFs)
+
 			if len(tc.warnings) > 0 {
 				for _, w := range tc.warnings {
 					idx := slices.IndexFunc(diags, func(diagnostic *hcl.Diagnostic) bool {
@@ -684,9 +673,10 @@ func Test_Extract(t *testing.T) {
 				check(t, param)
 			}
 
-			// Assert presets
-			if tc.presets != nil {
-				tc.presets(t, output.Presets)
+			for _, preset := range output.Presets {
+				check, ok := tc.presets[preset.Name]
+				require.True(t, ok, "unknown preset %s", preset.Name)
+				check(t, preset)
 			}
 
 			// Assert variables
@@ -696,6 +686,55 @@ func Test_Extract(t *testing.T) {
 				require.True(t, ok, "unknown variable %s", variable.Name)
 				check(t, variable)
 			}
+		})
+	}
+}
+
+func TestPresetValidation(t *testing.T) {
+	t.Parallel()
+
+	for _, tc := range []struct {
+		name         string
+		dir          string
+		input        preview.Input
+		presetAssert map[string]assertPreset
+	}{
+		{
+			name:  "preset failure",
+			dir:   "presetfail",
+			input: preview.Input{},
+			presetAssert: map[string]assertPreset{
+				"invalid_parameters": aPreWithDiags().
+					errorDiagnostics("Parameter no_default: Required parameter not provided"),
+				"valid_preset": aPre().
+					value("has_default", "changed").
+					value("no_default", "custom value").
+					noDiagnostics(),
+				"prebuild_instance_zero": aPre().noDiagnostics().prebuildCount(0),
+				"not_prebuild":           aPre().noDiagnostics().prebuildCount(0),
+			},
+		},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+
+			dirFs := os.DirFS(filepath.Join("testdata", tc.dir))
+			output, diags := preview.Preview(context.Background(), tc.input, dirFs)
+			if diags.HasErrors() {
+				t.Logf("diags: %s", diags)
+			}
+			require.False(t, diags.HasErrors())
+			require.Len(t, diags, 0)
+
+			preview.ValidatePrebuilds(context.Background(), tc.input, output.Presets, dirFs)
+			for _, preset := range output.Presets {
+				check, ok := tc.presetAssert[preset.Name]
+				require.True(t, ok, "unknown preset %s", preset.Name)
+				check(t, preset)
+				delete(tc.presetAssert, preset.Name)
+			}
+
+			require.Len(t, tc.presetAssert, 0, "some presets were not found")
 		})
 	}
 }
@@ -884,6 +923,81 @@ func (a assertVariable) extend(f assertVariable) assertVariable {
 	}
 
 	return func(t *testing.T, v types.Variable) {
+		t.Helper()
+		(a)(t, v)
+		f(t, v)
+	}
+}
+
+type assertPreset func(t *testing.T, preset types.Preset)
+
+func aPre() assertPreset {
+	return func(t *testing.T, preset types.Preset) {
+		t.Helper()
+		assert.Empty(t, preset.Diagnostics, "preset should have no diagnostics")
+	}
+}
+
+func aPreWithDiags() assertPreset {
+	return func(t *testing.T, parameter types.Preset) {}
+}
+
+func (a assertPreset) def(def bool) assertPreset {
+	return a.extend(func(t *testing.T, preset types.Preset) {
+		require.Equal(t, def, preset.Default)
+	})
+}
+
+func (a assertPreset) prebuildCount(exp int) assertPreset {
+	return a.extend(func(t *testing.T, preset types.Preset) {
+		if exp == 0 && preset.Prebuilds == nil {
+			return
+		}
+		require.NotNilf(t, preset.Prebuilds, "prebuild should not be nil, expected %d instances", exp)
+		require.Equal(t, exp, preset.Prebuilds.Instances)
+	})
+}
+
+func (a assertPreset) value(key, value string) assertPreset {
+	return a.extend(func(t *testing.T, preset types.Preset) {
+		v, ok := preset.Parameters[key]
+		require.Truef(t, ok, "preset parameter %q existence check", key)
+		assert.Equalf(t, value, v, "preset parameter %q value equality check", key)
+	})
+}
+
+func (a assertPreset) errorDiagnostics(patterns ...string) assertPreset {
+	return a.diagnostics(hcl.DiagError, patterns...)
+}
+
+func (a assertPreset) warnDiagnostics(patterns ...string) assertPreset {
+	return a.diagnostics(hcl.DiagWarning, patterns...)
+}
+
+func (a assertPreset) diagnostics(sev hcl.DiagnosticSeverity, patterns ...string) assertPreset {
+	shadow := patterns
+	return a.extend(func(t *testing.T, preset types.Preset) {
+		t.Helper()
+
+		assertDiags(t, sev, preset.Diagnostics, shadow...)
+	})
+}
+
+func (a assertPreset) noDiagnostics() assertPreset {
+	return a.extend(func(t *testing.T, preset types.Preset) {
+		t.Helper()
+
+		assert.Empty(t, preset.Diagnostics, "parameter should have no diagnostics")
+	})
+}
+
+//nolint:revive
+func (a assertPreset) extend(f assertPreset) assertPreset {
+	if a == nil {
+		a = func(t *testing.T, v types.Preset) {}
+	}
+
+	return func(t *testing.T, v types.Preset) {
 		t.Helper()
 		(a)(t, v)
 		f(t, v)
