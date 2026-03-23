@@ -156,6 +156,29 @@ func Preview(ctx context.Context, input Input, dir fs.FS) (output *Output, diagn
 		}
 	}()
 
+	// Merge override files into primary files before parsing, so
+	// Trivy sees post-merge content with no duplicate blocks. This
+	// replicates Terraform's override file semantics.
+	//
+	// TODO: It'd be nice if Trivy did this for us.
+	mergedDir, overrideDiags, err := mergeOverrides(dir)
+	// Override merging is best-effort; downgrade all override error
+	// diagnostics to warnings so they never abort the preview.
+	for _, d := range overrideDiags {
+		if d.Severity == hcl.DiagError {
+			d.Severity = hcl.DiagWarning
+		}
+	}
+	if err != nil {
+		overrideDiags = overrideDiags.Append(&hcl.Diagnostic{
+			Severity: hcl.DiagWarning,
+			Summary:  "Override file merging disabled due to an error",
+			Detail:   err.Error(),
+		})
+	} else {
+		dir = mergedDir
+	}
+
 	varFiles, err := tfvars.TFVarFiles("", dir)
 	if err != nil {
 		return nil, hcl.Diagnostics{
@@ -267,7 +290,7 @@ func Preview(ctx context.Context, input Input, dir fs.FS) (output *Output, diagn
 		Presets:       preValidPresets,
 		Files:         p.Files(),
 		Variables:     vars,
-	}, diags.Extend(rpDiags).Extend(tagDiags)
+	}, diags.Extend(overrideDiags).Extend(rpDiags).Extend(tagDiags)
 }
 
 func (i Input) RichParameterValue(key string) (string, bool) {
