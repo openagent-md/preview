@@ -3,7 +3,7 @@ module github.com/openagent-md/preview
 go 1.25.6
 
 require (
-	cdr.dev/slog v1.6.2-0.20240126064726-20367d4aede6
+	dev.latticeruntime.com/slog v1.6.2-0.20240126064726-20367d4aede6
 	github.com/aquasecurity/trivy v0.61.1-0.20250407075540-f1329c7ea1aa
 	github.com/openagent-md/serpent v0.10.0
 	github.com/openagent-md/terraform-provider-coder/v2 v2.8.0

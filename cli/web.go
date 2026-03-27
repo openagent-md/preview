@@ -16,8 +16,8 @@ import (
 
 	"github.com/go-chi/chi"
 
-	"cdr.dev/slog"
-	"cdr.dev/slog/sloggers/sloghuman"
+	"dev.latticeruntime.com/slog"
+	"dev.latticeruntime.com/slog/sloggers/sloghuman"
 	"github.com/openagent-md/preview/types"
 	"github.com/openagent-md/preview/web"
 	"github.com/openagent-md/serpent"

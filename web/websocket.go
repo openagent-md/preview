@@ -3,7 +3,7 @@ package web
 import (
 	"context"
 
-	"cdr.dev/slog"
+	"dev.latticeruntime.com/slog"
 	"github.com/openagent-md/websocket"
 	"github.com/openagent-md/websocket/wsjson"
 )
