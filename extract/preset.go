@@ -6,7 +6,7 @@ import (
 	"github.com/aquasecurity/trivy/pkg/iac/terraform"
 	"github.com/hashicorp/hcl/v2"
 
-	"github.com/coder/preview/types"
+	"github.com/openagent-md/preview/types"
 )
 
 func PresetFromBlock(block *terraform.Block) (tfPreset types.Preset) {

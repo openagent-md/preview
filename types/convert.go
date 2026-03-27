@@ -6,7 +6,7 @@ import (
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 
-	"github.com/coder/terraform-provider-coder/v2/provider"
+	"github.com/openagent-md/terraform-provider-coder/v2/provider"
 )
 
 func providerValidations(vals []*ParameterValidation) []provider.Validation {

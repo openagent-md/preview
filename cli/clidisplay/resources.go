@@ -11,8 +11,8 @@ import (
 	"github.com/hashicorp/hcl/v2"
 	"github.com/jedib0t/go-pretty/v6/table"
 
-	"github.com/coder/preview/types"
-	"github.com/coder/terraform-provider-coder/v2/provider"
+	"github.com/openagent-md/preview/types"
+	"github.com/openagent-md/terraform-provider-coder/v2/provider"
 )
 
 func WorkspaceTags(writer io.Writer, tags types.TagBlocks) hcl.Diagnostics {

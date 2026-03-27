@@ -13,10 +13,10 @@ import (
 	"github.com/hashicorp/terraform-exec/tfexec"
 	"github.com/stretchr/testify/require"
 
-	"github.com/coder/preview"
-	"github.com/coder/preview/internal/verify"
-	"github.com/coder/preview/tfvars"
-	"github.com/coder/preview/types"
+	"github.com/openagent-md/preview"
+	"github.com/openagent-md/preview/internal/verify"
+	"github.com/openagent-md/preview/tfvars"
+	"github.com/openagent-md/preview/types"
 )
 
 // Test_VerifyE2E will fully evaluate with `terraform apply`

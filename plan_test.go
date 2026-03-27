@@ -6,8 +6,8 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/coder/preview"
-	"github.com/coder/preview/types"
+	"github.com/openagent-md/preview"
+	"github.com/openagent-md/preview/types"
 )
 
 func TestPlanJSONHook(t *testing.T) {

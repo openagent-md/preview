@@ -5,8 +5,8 @@ import (
 	"io/fs"
 
 	"cdr.dev/slog"
-	"github.com/coder/preview"
-	"github.com/coder/preview/types"
+	"github.com/openagent-md/preview"
+	"github.com/openagent-md/preview/types"
 )
 
 type Request struct {

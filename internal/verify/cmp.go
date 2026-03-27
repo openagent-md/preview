@@ -8,9 +8,9 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/coder/preview"
-	"github.com/coder/preview/extract"
-	"github.com/coder/preview/types"
+	"github.com/openagent-md/preview"
+	"github.com/openagent-md/preview/extract"
+	"github.com/openagent-md/preview/types"
 )
 
 func Compare(t *testing.T, pr *preview.Output, values *tfjson.StateModule) {

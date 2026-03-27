@@ -5,7 +5,7 @@ import (
 	tfcontext "github.com/aquasecurity/trivy/pkg/iac/terraform/context"
 	"github.com/zclconf/go-cty/cty"
 
-	"github.com/coder/preview/hclext"
+	"github.com/openagent-md/preview/hclext"
 )
 
 // parameterContextsEvalHook is called in a loop, so if parameters affect

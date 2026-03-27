@@ -9,7 +9,7 @@ import (
 	"github.com/zclconf/go-cty/cty"
 	"github.com/zclconf/go-cty/cty/convert"
 
-	"github.com/coder/preview/types"
+	"github.com/openagent-md/preview/types"
 )
 
 // VariableFromBlock extracts a terraform variable, but not its final resolved value.

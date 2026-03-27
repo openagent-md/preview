@@ -7,8 +7,8 @@ import (
 	"github.com/aquasecurity/trivy/pkg/iac/terraform"
 	"github.com/hashicorp/hcl/v2"
 
-	"github.com/coder/preview/extract"
-	"github.com/coder/preview/types"
+	"github.com/openagent-md/preview/extract"
+	"github.com/openagent-md/preview/types"
 )
 
 func parameters(modules terraform.Modules) ([]types.Parameter, hcl.Diagnostics) {

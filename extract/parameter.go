@@ -11,9 +11,9 @@ import (
 	"github.com/hashicorp/hcl/v2/hclsyntax"
 	"github.com/zclconf/go-cty/cty"
 
-	"github.com/coder/preview/hclext"
-	"github.com/coder/preview/types"
-	"github.com/coder/terraform-provider-coder/v2/provider"
+	"github.com/openagent-md/preview/hclext"
+	"github.com/openagent-md/preview/types"
+	"github.com/openagent-md/terraform-provider-coder/v2/provider"
 )
 
 func ParameterFromBlock(block *terraform.Block) (*types.Parameter, hcl.Diagnostics) {

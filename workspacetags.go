@@ -7,7 +7,7 @@ import (
 	"github.com/hashicorp/hcl/v2"
 	"github.com/zclconf/go-cty/cty"
 
-	"github.com/coder/preview/types"
+	"github.com/openagent-md/preview/types"
 )
 
 func workspaceTags(modules terraform.Modules, files map[string]*hcl.File) (types.TagBlocks, hcl.Diagnostics) {

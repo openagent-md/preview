@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/zclconf/go-cty/cty"
 
-	"github.com/coder/preview/types"
+	"github.com/openagent-md/preview/types"
 )
 
 func TestSafeHCLString(t *testing.T) {

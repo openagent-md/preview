@@ -4,8 +4,8 @@ import (
 	"context"
 
 	"cdr.dev/slog"
-	"github.com/coder/websocket"
-	"github.com/coder/websocket/wsjson"
+	"github.com/openagent-md/websocket"
+	"github.com/openagent-md/websocket/wsjson"
 )
 
 func (s *Session) Listen(ctx context.Context, conn *websocket.Conn) {

@@ -3,7 +3,7 @@ package types
 import (
 	"github.com/aquasecurity/trivy/pkg/iac/terraform"
 
-	"github.com/coder/preview/hclext"
+	"github.com/openagent-md/preview/hclext"
 )
 
 // @typescript-ignore TagBlocks

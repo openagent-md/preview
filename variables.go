@@ -6,8 +6,8 @@ import (
 
 	"github.com/aquasecurity/trivy/pkg/iac/terraform"
 
-	"github.com/coder/preview/extract"
-	"github.com/coder/preview/types"
+	"github.com/openagent-md/preview/extract"
+	"github.com/openagent-md/preview/types"
 )
 
 func variables(modules terraform.Modules) []types.Variable {

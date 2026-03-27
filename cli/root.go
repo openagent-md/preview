@@ -13,10 +13,10 @@ import (
 	"github.com/hashicorp/hcl/v2/hclsyntax"
 	ctyjson "github.com/zclconf/go-cty/cty/json"
 
-	"github.com/coder/preview"
-	"github.com/coder/preview/cli/clidisplay"
-	"github.com/coder/preview/types"
-	"github.com/coder/serpent"
+	"github.com/openagent-md/preview"
+	"github.com/openagent-md/preview/cli/clidisplay"
+	"github.com/openagent-md/preview/types"
+	"github.com/openagent-md/serpent"
 )
 
 type RootCmd struct {

@@ -7,7 +7,7 @@ import (
 	"github.com/hashicorp/hcl/v2"
 	"github.com/stretchr/testify/require"
 
-	"github.com/coder/preview/types"
+	"github.com/openagent-md/preview/types"
 )
 
 func TestDiagnosticExtra(t *testing.T) {

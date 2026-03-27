@@ -7,7 +7,7 @@ import (
 
 	"github.com/hashicorp/hcl/v2"
 
-	"github.com/coder/preview/cli"
+	"github.com/openagent-md/preview/cli"
 )
 
 func main() {

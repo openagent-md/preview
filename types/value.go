@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/hcl/v2/hclsyntax"
 	"github.com/zclconf/go-cty/cty"
 
-	"github.com/coder/preview/hclext"
+	"github.com/openagent-md/preview/hclext"
 )
 
 const (

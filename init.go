@@ -6,7 +6,7 @@ import (
 	"github.com/zclconf/go-cty/cty/function"
 	"golang.org/x/xerrors"
 
-	"github.com/coder/preview/hclext"
+	"github.com/openagent-md/preview/hclext"
 )
 
 // init intends to override some of the default functions afforded by terraform.

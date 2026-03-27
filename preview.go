@@ -13,9 +13,9 @@ import (
 	"github.com/zclconf/go-cty/cty"
 	ctyjson "github.com/zclconf/go-cty/cty/json"
 
-	"github.com/coder/preview/hclext"
-	"github.com/coder/preview/tfvars"
-	"github.com/coder/preview/types"
+	"github.com/openagent-md/preview/hclext"
+	"github.com/openagent-md/preview/tfvars"
+	"github.com/openagent-md/preview/types"
 )
 
 type Input struct {
