@@ -13,7 +13,7 @@ import (
 
 	"github.com/openagent-md/preview/hclext"
 	"github.com/openagent-md/preview/types"
-	"github.com/openagent-md/terraform-provider-coder/v2/provider"
+	"github.com/latticehq/terraform-provider-lattice/provider"
 )
 
 func ParameterFromBlock(block *terraform.Block) (*types.Parameter, hcl.Diagnostics) {

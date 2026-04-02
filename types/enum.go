@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/openagent-md/terraform-provider-coder/v2/provider"
+	"github.com/latticehq/terraform-provider-lattice/provider"
 )
 
 // TODO: Just use the provider type directly.

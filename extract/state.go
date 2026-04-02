@@ -8,7 +8,7 @@ import (
 	tfjson "github.com/hashicorp/terraform-json"
 
 	"github.com/openagent-md/preview/types"
-	"github.com/openagent-md/terraform-provider-coder/v2/provider"
+	"github.com/latticehq/terraform-provider-lattice/provider"
 )
 
 func ParametersFromState(state *tfjson.StateModule) ([]types.Parameter, error) {

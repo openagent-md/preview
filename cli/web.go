@@ -16,12 +16,12 @@ import (
 
 	"github.com/go-chi/chi"
 
-	"dev.latticeruntime.com/slog"
-	"dev.latticeruntime.com/slog/sloggers/sloghuman"
+	"cdr.dev/slog"
+	"cdr.dev/slog/sloggers/sloghuman"
 	"github.com/openagent-md/preview/types"
 	"github.com/openagent-md/preview/web"
-	"github.com/openagent-md/serpent"
-	"github.com/openagent-md/websocket"
+	"github.com/coder/serpent"
+	"github.com/coder/websocket"
 )
 
 type responseRecorder struct {

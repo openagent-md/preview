@@ -9,7 +9,7 @@ import (
 	"github.com/hashicorp/hcl/v2"
 	"github.com/zclconf/go-cty/cty"
 
-	"github.com/openagent-md/terraform-provider-coder/v2/provider"
+	"github.com/latticehq/terraform-provider-lattice/provider"
 )
 
 // @typescript-ignore BlockTypeParameter
@@ -112,7 +112,7 @@ func (r *ParameterData) Valid(value HCLString) hcl.Diagnostics {
 		Type:        provider.OptionType(r.Type),
 		FormType:    r.FormType,
 		Mutable:     r.Mutable,
-		Default:     defPtr,
+		Default:     orZero(defPtr),
 		Icon:        r.Icon,
 		Option:      providerOptions(r.Options),
 		Validation:  providerValidations(r.Validations),

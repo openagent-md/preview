@@ -7,7 +7,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/openagent-md/serpent"
+	"github.com/coder/serpent"
 )
 
 func (*RootCmd) SetEnv() *serpent.Command {

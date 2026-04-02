@@ -4,7 +4,7 @@ import (
 	"context"
 	"io/fs"
 
-	"dev.latticeruntime.com/slog"
+	"cdr.dev/slog"
 	"github.com/openagent-md/preview"
 	"github.com/openagent-md/preview/types"
 )

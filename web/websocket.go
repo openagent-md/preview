@@ -3,9 +3,9 @@ package web
 import (
 	"context"
 
-	"dev.latticeruntime.com/slog"
-	"github.com/openagent-md/websocket"
-	"github.com/openagent-md/websocket/wsjson"
+	"cdr.dev/slog"
+	"github.com/coder/websocket"
+	"github.com/coder/websocket/wsjson"
 )
 
 func (s *Session) Listen(ctx context.Context, conn *websocket.Conn) {

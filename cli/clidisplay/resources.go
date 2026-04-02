@@ -12,7 +12,7 @@ import (
 	"github.com/jedib0t/go-pretty/v6/table"
 
 	"github.com/openagent-md/preview/types"
-	"github.com/openagent-md/terraform-provider-coder/v2/provider"
+	"github.com/latticehq/terraform-provider-lattice/provider"
 )
 
 func WorkspaceTags(writer io.Writer, tags types.TagBlocks) hcl.Diagnostics {

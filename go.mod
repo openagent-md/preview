@@ -3,11 +3,10 @@ module github.com/openagent-md/preview
 go 1.25.6
 
 require (
-	dev.latticeruntime.com/slog v1.6.2-0.20240126064726-20367d4aede6
+	cdr.dev/slog v1.6.2-0.20240126064726-20367d4aede6
 	github.com/aquasecurity/trivy v0.61.1-0.20250407075540-f1329c7ea1aa
-	github.com/openagent-md/serpent v0.10.0
-	github.com/openagent-md/terraform-provider-coder/v2 v2.8.0
-	github.com/openagent-md/websocket v1.8.13
+	github.com/coder/serpent v0.14.0
+	github.com/coder/websocket v1.8.14
 	github.com/go-chi/chi v4.1.2+incompatible
 	github.com/hashicorp/go-cty v1.5.0
 	github.com/hashicorp/go-version v1.8.0
@@ -17,6 +16,7 @@ require (
 	github.com/hashicorp/terraform-json v0.27.1
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.37.0
 	github.com/jedib0t/go-pretty/v6 v6.6.7
+	github.com/latticehq/terraform-provider-lattice v0.0.0-20260401203846-39f15c576ff3
 	github.com/quasilyte/go-ruleguard/dsl v0.3.23
 	github.com/stretchr/testify v1.11.1
 	github.com/zclconf/go-cty v1.17.0
@@ -24,6 +24,7 @@ require (
 )
 
 require (
+	cdr.dev/slog/v3 v3.0.0-rc1 // indirect
 	cel.dev/expr v0.24.0 // indirect
 	cloud.google.com/go v0.121.6 // indirect
 	cloud.google.com/go/auth v0.18.0 // indirect
@@ -70,7 +71,7 @@ require (
 	github.com/charmbracelet/lipgloss v0.8.0 // indirect
 	github.com/cloudflare/circl v1.6.3 // indirect
 	github.com/cncf/xds/go v0.0.0-20251022180443-0feb69152e9f // indirect
-	github.com/openagent-md/pretty v0.0.0-20230908205945-e89ba86370e0 // indirect
+	github.com/coder/pretty v0.0.0-20230908205945-e89ba86370e0 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/dlclark/regexp2 v1.11.4 // indirect
 	github.com/envoyproxy/go-control-plane/envoy v1.35.0 // indirect
@@ -125,6 +126,7 @@ require (
 	github.com/vmihailenco/msgpack v4.0.4+incompatible // indirect
 	github.com/vmihailenco/msgpack/v5 v5.4.1 // indirect
 	github.com/vmihailenco/tagparser/v2 v2.0.0 // indirect
+	github.com/xhit/go-str2duration/v2 v2.1.0 // indirect
 	github.com/zclconf/go-cty-yaml v1.1.0 // indirect
 	go.opentelemetry.io/auto/sdk v1.2.1 // indirect
 	go.opentelemetry.io/contrib/detectors/gcp v1.38.0 // indirect
