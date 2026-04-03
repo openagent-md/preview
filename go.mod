@@ -5,8 +5,8 @@ go 1.25.6
 require (
 	cdr.dev/slog v1.6.2-0.20240126064726-20367d4aede6
 	github.com/aquasecurity/trivy v0.61.1-0.20250407075540-f1329c7ea1aa
-	github.com/coder/serpent v0.14.0
-	github.com/coder/websocket v1.8.14
+	github.com/openagent-md/serpent v0.14.0
+	github.com/openagent-md/websocket v1.8.14
 	github.com/go-chi/chi v4.1.2+incompatible
 	github.com/hashicorp/go-cty v1.5.0
 	github.com/hashicorp/go-version v1.8.0
@@ -71,7 +71,6 @@ require (
 	github.com/charmbracelet/lipgloss v0.8.0 // indirect
 	github.com/cloudflare/circl v1.6.3 // indirect
 	github.com/cncf/xds/go v0.0.0-20251022180443-0feb69152e9f // indirect
-	github.com/coder/pretty v0.0.0-20230908205945-e89ba86370e0 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/dlclark/regexp2 v1.11.4 // indirect
 	github.com/envoyproxy/go-control-plane/envoy v1.35.0 // indirect
@@ -161,4 +160,4 @@ require (
 
 // Trivy has some issues that we're floating patches for, and will hopefully
 // be upstreamed eventually.
-replace github.com/aquasecurity/trivy => github.com/coder/trivy v0.0.0-20260309164037-c413f5a2f511
+replace github.com/aquasecurity/trivy => github.com/openagent-md/trivy v0.0.0-20260403162035-940d812b2de6

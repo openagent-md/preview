@@ -20,8 +20,8 @@ import (
 	"cdr.dev/slog/sloggers/sloghuman"
 	"github.com/openagent-md/preview/types"
 	"github.com/openagent-md/preview/web"
-	"github.com/coder/serpent"
-	"github.com/coder/websocket"
+	"github.com/openagent-md/serpent"
+	"github.com/openagent-md/websocket"
 )
 
 type responseRecorder struct {

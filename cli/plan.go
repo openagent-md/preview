@@ -7,7 +7,7 @@ import (
 	"os"
 	"os/exec"
 
-	"github.com/coder/serpent"
+	"github.com/openagent-md/serpent"
 )
 
 func (*RootCmd) TerraformPlan() *serpent.Command {

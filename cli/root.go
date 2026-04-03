@@ -16,7 +16,7 @@ import (
 	"github.com/openagent-md/preview"
 	"github.com/openagent-md/preview/cli/clidisplay"
 	"github.com/openagent-md/preview/types"
-	"github.com/coder/serpent"
+	"github.com/openagent-md/serpent"
 )
 
 type RootCmd struct {
